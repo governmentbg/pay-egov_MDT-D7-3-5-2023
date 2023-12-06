@@ -1,0 +1,215 @@
+﻿@model System.String
+@{
+    ViewBag.Title = "Помощ, въпроси и отговори";
+}
+
+<script type="text/javascript">
+
+    @if (!String.IsNullOrWhiteSpace(Model))
+    {
+        <text>
+        $(document).ready(function () {
+            @if (Model.ToLower() == "question_1.1")
+            {
+                <text>
+                $('#question_1_header').addClass("section-heading opened");
+                $('#question_1_section').css('display', 'block');
+
+                $('html, body').animate({
+                    scrollTop: $("#question_1_header").offset().top
+                }, 500);
+                </text>
+            }
+            else
+            {
+                <text>
+                $('html, body').animate({
+                    scrollTop: $('@(String.Format("#{0}", Model))').offset().top
+                }, 500);
+                </text>
+                
+            }
+        });
+        </text>
+    }
+
+</script>
+
+<div class="container main-content">
+    <h1>Помощ, въпроси и отговори</h1>
+    <h2>Портал за електронни плащания и среда за електронни плащания към доставчици на електронни административни услуги</h2>
+
+    <h3 id="service_desc"><b>Какво представлява Средата за електронни плащания?</b></h3>
+
+    <p style="text-align: justify;">Средата за електронни плащания регистрира всички електронни плащания, свързани с предоставяне на електронни административни услуги, създава електронни платежни документи и осигурява възможност за плащането им по избран от потребителите (гражданите и бизнеса) начин.</p>
+    <p style="text-align: justify;">Това става възможно чрез свързването на всички доставчици на електронни административни услуги (ДЕАУ) и всички доставчици на платежни услуги (ДПУ) към нея. Когато потребител заяви електронна услуга в портала на дадена администрация, в Средата се създава и регистрира електронно платежно нареждане. На всички ДПУ им се предоставя възможност да изтеглят информация за текущите задължения на всеки един потребител, като по този начин ДПУ имат възможност да предложат на своите клиенти различни начини за плащане - например чрез интернет банкиране, плащане на гише, мобилни разплащания и т.н. Достъпът на ДПУ до текущите задължения на всяко едно лице се дава единствено и само след изрично изразено съгласие на съответното лице.</p>
+    <p style="text-align: justify;">След като наредените суми (такси и други плащания) постъпят по сметка на съответната администрация – доставчик на услугата, банката, обслужваща администрацията, уведомява Средата автоматично по електронен път за извършеното плащане. Веднага след това отново автоматично по електронен път, Средата уведомява информационната система на ДЕАУ, че плащането е извършено и безпрепятствено може да се осъществи процесът по предоставяне на съответната услуга.</p>
+    <p style="text-align: justify;">За допълнителна информация може да видите:</p>
+    <p style="text-align: justify; padding-left: 30px;">@Html.ActionLink("Включени в Средата администрации", MVC.Home.ActionNames.Departments, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" })<br />@Html.ActionLink("Включени в Средата доставчици на платежни услуги", MVC.Home.ActionNames.BanksInfo, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" })</p>
+
+
+    <h3><b>Какво представлява Порталът на Средата за електронни плащания?</b></h3>
+
+    <p style="text-align: justify;">Средата за електронни плащания е посредник при обмена на съобщения между участниците в нея (банки, администрации и др.). Осъществяването на дейността й не се визуализира пред получателите на електронни административни услуги. За улеснение на потребителите обаче, е разработен и портал, в който те могат да видят своите текущи задължения, както и статуса на всички техни плащания, регистрирани сега или по-рано в Средата. Входът в Портала се извършва единствено чрез квалифициран електронен подпис, Код за плащане или след пренасочване в автоматичен режим от някоя друга информационна система на администрацията. <b>Не се предоставя достъп с потребителско име и парола</b>.</p>
+    <p style="text-align: justify;">За допълнителна информация може да видите:</p>
+    <p style="text-align: justify; padding-left: 30px;">
+        @Html.ActionLink("Включени в Средата администрации", MVC.Home.ActionNames.Departments, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" })<br />
+        @Html.ActionLink("Включени в Средата доставчици на платежни услуги", MVC.Home.ActionNames.BanksInfo, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" })<br />
+        @Html.ActionLink("Генериране на Код за плащане и вход с него в Портала", MVC.Home.ActionNames.Help, MVC.Home.Name, new { focus = "access_code" }, new { style = "color: #0097e5; text-decoration: none" })
+    </p>
+
+
+    <h3 id="payment_methods"><b>Какви начини на плащане осигурява Средата?</b></h3>
+
+    <p style="text-align: justify;">Предлаганите начини на плащане зависят конкретно от всеки един доставчик на платежни услуги, включен към Средата, през който потребителят иска да плати своето задължение.</p>
+    <p style="text-align: justify;">Безспорно най-удобният и разпространен начин за плащане през Интернет е с помощта на дебитна или кредитна карта, като по този начин, плащането става веднага. В някои случаи този начин не е възможно или не е удачно да се използва - например, ако администрацията по някакви причини няма договор с доставчик на виртуален ПОС терминал за плащане с карти през интернет или таксата за услугата е много висока (често тя представлява процент от дължимата сума) и това би довело до неоправдани разходи. В такива случаи плащането може да се извърши чрез някой от другите начини, предлагани от доставчиците на платежни услуги, свързани със Средата за електронни плащания. Преди това обаче администрацията, предоставяща съответната услуга, задължително трябва да е регистрирала заявката за плащане на съответното задължение в Средата за електронни плащания. Вече регистрираната заявка за плащане ще може да бъде платена по начин, избран от получателя на услугата сред различните възможности, предлагани от съответната администрация и обслужващия го доставчик на платежни услуги.</p>
+    <p style="text-align: justify;">Например, ако сте заявили услуга по електронен път в портала на някоя администрация (тя трябва да е свързана със Средата), в Средата ще се регистрира заявка за плащане. Когато след това влезете в интернет банкирането на Вашата банка (необходимо е тя също да е свързана със Средата), в менюто „Плащания към бюджета” ще може да видите Вашето задължение към дадената администрация, както и ще имате възможност да го платите  без да е необходимо допълнително да въвеждате информация за суми, получател, основание и т.н. Същото се отнася и ако искате да платите такса на гише или по друг начин, който банката предоставя, например плащания през мобилен телефон.</p>
+    <p style="text-align: justify;">
+        Начините на плащане зависят от администрацията, която предоставя електронната административна услуга. Предлаганите от единната входна точна за електронни плащания начини на плащане са:
+        <ul class="ticks">
+            <li>кредитна или дебитна карта през виртуален ПОС терминал или ЦВПОС</li>
+            <li>възможност за генериране на платежно нареждане, което да се използва за превод в банков офис</li>
+            <li>плащане чрез ePay</li>
+        </ul>
+    </p>
+    <p style="text-align: justify;">Възможните начини на плащане за всяка заявена административна услуга се визуализират в поле „действия“ срещу всяко задължение.</p>
+    <p style="text-align: justify;"><b>За реализацията на всеки един от горепосочените начини обаче е задължително ДЕАУ и избраният от потребителя ДПУ (банка) да са свързани със Средата за електронни плащания.</b></p>
+    <p style="text-align: justify;">За допълнителна информация относно участниците в Средата може да видите:</p>
+
+    <p style="text-align: justify; padding-left: 30px;">@Html.ActionLink("Включени в Средата администрации", MVC.Home.ActionNames.Departments, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" })<br />@Html.ActionLink("Включени в Средата доставчици на платежни услуги", MVC.Home.ActionNames.BanksInfo, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" })</p>
+
+    <h3 id="access_code"><b>Генериране на Код за плащане и вход с него в портала</b></h3>
+
+    <p style="text-align: justify;">Функционалността „Код за плащане“ позволява да се влезе в системата без квалифициран електронен подпис и да се достъпи информация и/или да се заплати конкретното задължение, за което се отнася кодът от произволно лице.</p>
+    <p style="text-align: justify;">Функционалността е удобна за случаи, в които потребителят иска да предостави възможността на някой друг да влезе в Портала, да види и да заплати негово конкретно задължение, без да може да вижда останалите му задължения. Например, той можете да предостави този код на негов роднина, клиент, колега или служител, който да извърши плащането от негово име. Или например, ако потребителят иска на по-късен етап да влезете в Средата и да види и/или заплати конкретно задължение без квалифициран електронен подпис (КЕП) - например от мобилен телефон, поради съществуващите технически ограничения за използване на КЕП от мобилни устройства.</p>
+    <p style="text-align: justify;">
+        Системата предоставя функционалност за:
+        <ul class="ticks">
+            <li>генериране на нов код;</li>
+            <li>преглед и копиране на хипервръзката, с която може да се достъпи системата директно и кодът, свързан с конкретното задължение за плащане;</li>
+            <li>изпращане на посочен от потребителя произволен адрес на електронна поща хипервръзка за директен достъп до системата и конкретно задължение, както и самият Код за плащане по това задължение;</li>
+        </ul>
+    </p>
+    <p style="text-align: justify;">Ако кодът бъде генериран наново, то старият вече няма да може да се използва, като междувременно, ако потребителя го е дал на някой, ще е необходимо да му изпрати новия Код за плащане повторно.</p>
+    <p style="text-align: justify;">При регистрацията на всяка заявка за плащане в Средата от административна информационна система (АИС) на администрацията, настоящата система генерира автоматично Код за плащане и го връща на АИС, така, че потребителят може да получи Код за плащане и от самия АИС, а не от настоящата система и с него да достъпи конкретното задължение без КЕП, например от мобилен телефон.</p>
+    <p style="text-align: justify;">Кодът е десет символен, състоящ се от цифри и латински букви. </p>
+
+    <h3><b>Сигурност и лични данни</b></h3>
+
+    <p style="text-align: justify;">Личните данни от електронните платежни нареждания в системата се пазят в криптиран вид, а достъпът до тях от потребителите през портала се осъществява единствено с квалифициран електронен подпис.</p>
+    <p style="text-align: justify;">Информация за текущите неплатени задължения се предоставя и на доставчиците на платежни услуги (банките) по криптирани комуникационни канали, но само след изричното еднократно първоначално съгласие на всеки един конкретен потребител. </p>
+    <p style="text-align: justify;">Всеки един опит за достъп до данни в портала от информационните системи на доставчиците на платежни услуги, независимо дали той е успешен или не, се записват в базата данни на системата. Порталът поддържа функционалност от менюто „Настройки“, която позволява на потребителите след вход в системата да видят информация за това колко пъти, кое тяхно задължение, на коя дата, от коя информационна система и от кой интернет адрес е достъпено. </p>
+    <p style="text-align: justify;">При съмнение за осъществен неправомерен достъп до Вашите данни, може да се обърнете към Министерство на електронното управление за допълнителна справка или да поддадете сигнал за проверка чрез формата за @Html.ActionLink("Обратна връзка", MVC.Home.ActionNames.Feedback, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" }).</p>
+
+    <h3><b>Технически изисквания</b></h3>
+
+    <p style="text-align: justify;">За правилната работа на системата е необходимо в браузъра да е разрешено изпълнението на JavaScript. За подробности относно включването и изключването на тази функционалност вижте потребителската документация на използвания от Вас браузър.</p>
+    <p style="text-align: justify;">
+        Порталът за електронни плащания е разработен и тестван за работа със следните видове браузъри:
+        <ul class="browsers">
+            <li><a href="http://windows.microsoft.com/bg-bg/internet-explorer/ie-9-worldwide-languages" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.ie_jpg" alt="">Microsoft Internet Explorer 7-9 или по-нов;</a></li>
+            <li><a href="http://www.mozilla.org/bg/firefox/new/" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.firefox_jpg" alt="">Mozilla Firefox 10-17 или по-нов;</a></li>
+            <li><a href="https://www.google.com/intl/bg/chrome/browser/" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.chrome_jpg" alt="">Google Chrome 17-23 или по-нов;</a></li>
+            <li><a href="https://www.apple.com/safari/" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.safari_jpg" alt="">Safari 5 или по-нов;</a></li>
+            <li><a href="http://www.opera.com/bg/computer/windows" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.opera_jpg" alt="">Opera 11 или по-нов;</a></li>
+        </ul>
+    </p>
+    <p style="text-align: justify;">В момента по наши наблюдения от проведените тестове системата работи с всички браузъри, но най-добре с <a href="https://www.google.com/intl/bg/chrome/browser/" target="_blank" style="color: #0097e5; text-decoration: none">Google Chrome</a></p>
+    <p style="text-align: justify;">Препоръката ни е винаги да се стремите да използвате съвременни компютри, както и винаги да работите с последна актуална версия на използвания от Вас браузър.</p>
+
+    <h2>Въпроси и отговори</h2>
+    <div class="help-questions">
+        <h3 data-section="1" class="section-heading" id="question_1_header">
+            <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+            1. Потребители и вход в системата
+        </h3>
+        <section data-section="1" class="clearfix" id="question_1_section">
+            <h4 data-section="1-1" class="section-heading">
+                <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+                1.1. Как да вляза в системата?
+            </h4>
+            <section data-section="1-1" class="clearfix">
+                <p style="text-align: justify;">
+                    Входът в системата е възможен единствено чрез квалифициран електронен подпис, Код за плащане или след пренасочване в автоматичен режим от някоя друга информационна система на администрацията.
+                </p>
+                <p style="text-align: justify;">
+                    <strong>Не се предоставя вход в системата с потребителско име и парола.</strong>
+                </p>
+            </section>
+
+            <h4 data-section="1-2" class="section-heading">
+                <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+                1.2. Как да се сдобия с квалифициран електронен подпис?
+            </h4>
+            <section data-section="1-2" class="clearfix">
+                <p style="text-align: justify;">
+                    Комисията за регулиране на съобщенията поддържа <a href="http://www.crc.bg/section.php?id=182" target="_blank" style="color: #0097e5; text-decoration: none">Регистър на доставчиците на удостоверителни услуги, издаващи удостоверения за квалифициран електронен подпис (КЕП)</a>. Можете да си закупите и извадите КЕП от произволен доставчик.
+                </p>
+            </section>
+        </section>
+        <div class="section-separator"> </div>
+
+        <h3 data-section="2" class="section-heading">
+            <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+            2. Банки и администрации, свързани  със  Средата за електронни плащания
+        </h3>
+        <section data-section="2" class="clearfix">
+            <h4 data-section="2-1" class="section-heading">
+                <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+                2.1. Кои са включените администрации?
+            </h4>
+            <section data-section="2-1" class="clearfix">
+                <p style="text-align: justify;">
+                    Чрез Средата за електронни плащания може да извършите плащане към всеки един от доставчиците на електронни административни услуги, които вече са се свързали с нея. Възможно е обаче някоя администрация да не позволява плащане на всички свои електронни услуги през Средата. Информация за включените към момента доставчици може да намерите във @Html.ActionLink("Включени в Средата администрации", MVC.Home.ActionNames.Departments, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" }).
+                </p>
+            </section>
+
+            <h4 data-section="2-2" class="section-heading">
+                <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+                2.2. Кои доставчици на платежни услуги са включени към Средата?
+            </h4>
+            <section data-section="2-2" class="clearfix">
+                <p style="text-align: justify;">
+                    Информация за доставчиците на платежни услуги, които вече са се свързали със Средата за електронни плащания, може да намерите във @Html.ActionLink("Включени в Средата доставчици на платежни услуги", MVC.Home.ActionNames.BanksInfo, MVC.Home.Name, null, new { style = "color: #0097e5; text-decoration: none" }).
+                </p>
+            </section>
+        </section>
+        <div class="section-separator"> </div>
+
+        <h3 data-section="3" class="section-heading">
+            <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+            3. Въпроси, свързани с работата със системата
+        </h3>
+        <section data-section="3" class="clearfix">
+            <h4 data-section="3-1" class="section-heading">
+                <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+                3.1. Защо някои функционалности в системата не работят?
+            </h4>
+            <section data-section="3-1" class="clearfix">
+                <p style="text-align: justify;">
+                    За правилната работа на системата е необходимо в браузъра да е разрешено изпълнението на JavaScript. За подробности относно включването и изключването на тази функционалност вижте потребителската документация на използвания от Вас браузър.
+                </p>
+            </section>
+
+            <h4 data-section="3-2" class="section-heading">
+                <img class="arrow" src="@Links.Content.images.icons.faq_arrow_png" alt="">
+                3.2. Кой браузър да използвам, за да работя със системата?
+            </h4>
+            <section data-section="3-2" class="clearfix">
+                <p style="text-align: justify;">
+                    Системата е разработена и тествана за работа със следните видове браузъри:
+                    <ul class="browsers">
+                        <li><a href="http://windows.microsoft.com/bg-bg/internet-explorer/ie-9-worldwide-languages" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.ie_jpg" alt="">Microsoft Internet Explorer 7-9 или по-нов;</a></li>
+                        <li><a href="http://www.mozilla.org/bg/firefox/new/" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.firefox_jpg" alt="">Mozilla Firefox 10-17 или по-нов;</a></li>
+                        <li><a href="https://www.google.com/intl/bg/chrome/browser/" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.chrome_jpg" alt="">Google Chrome 17-23 или по-нов;</a></li>
+                        <li><a href="https://www.apple.com/safari/" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.safari_jpg" alt="">Safari 5 или по-нов;</a></li>
+                        <li><a href="http://www.opera.com/bg/computer/windows" target="_blank" style="color: #0097e5; text-decoration: none"><img src="@Links.Content.images.icons.browsers.opera_jpg" alt="">Opera 11 или по-нов;</a></li>
+                    </ul>
+                </p>
+                <p style="text-align: justify;">В момента по наши наблюдения от проведените тестове, системата работи с всички браузъри, но най-добре с <a href="https://www.google.com/intl/bg/chrome/browser/" target="_blank" style="color: #0097e5; text-decoration: none">Google Chrome</a></p>
+                <p style="text-align: justify;">Препоръката ни е винаги да се стремите да използвате съвременни компютри, както и винаги да работите с последна актуална версия на използвания от Вас браузър.</p>
+            </section>
+        </section>
+    </div>
+</div>
+<!-- -->
