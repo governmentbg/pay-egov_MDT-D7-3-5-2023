@@ -303,62 +303,72 @@ namespace EPayments.Data.Repositories.Implementations
         public List<Tuple<int, RequestRefidInfoVO>> GetParsedRequestInfoByRefid(int refid, string clientId)
         {
 
-            return (from dr in unitOfWork.DbContext.Set<DistributionRevenue>()
-                    join drp in unitOfWork.DbContext.Set<DistributionRevenuePayment>() on dr.DistributionRevenueId equals drp.DistributionRevenueId
-                    join bt in unitOfWork.DbContext.Set<BoricaTransaction>() on drp.BoricaTransactionId equals bt.BoricaTransactionId
-                    join es in unitOfWork.DbContext.Set<EserviceClient>() on drp.EserviceClientId equals es.EserviceClientId
-                    join depart in unitOfWork.DbContext.Set<Department>() on es.DepartmentId equals depart.DepartmentId
-                    where dr.DistributionRevenueId == refid && es.ClientId == clientId
-                    select new
-                    {
-                        BoricaTransactionId = bt.BoricaTransactionId,
-                        DistributionRevenueId = dr.DistributionRevenueId,
-                        requestRefidInfoVO = new RequestRefidInfoVO()
-                        {
-                            DistributionRevenueId = dr.DistributionRevenueId,
-                            TotalSum = dr.TotalSum,
-                            CreatedAt = dr.CreatedAt,
-                            Order = bt.Order,
-                            Amount = bt.Amount,
-                            TransactionDate = bt.TransactionDate,
-                            Rrn = bt.Rrn,
-                            PaymentInfo =
-                            bt.PaymentRequests.Select(pr =>  new RequestPaymentInfoParsedVO
-                            {
-                                Id = pr.PaymentRequestId.ToString(),
-                                Status = pr.PaymentRequestStatusId,
-                                StatusChangeTime = pr.PaymentRequestStatusChangeTime,
-                                ServiceProviderName = pr.ServiceProviderName,
-                                ServiceProviderBank = pr.ServiceProviderBank,
-                                ServiceProviderBIC = pr.ServiceProviderBIC,
-                                ServiceProviderIBAN = pr.ServiceProviderIBAN,
-                                Currency = pr.Currency,
-                                PaymentTypeCode = pr.PaymentTypeCode,
-                                PaymentAmount = pr.PaymentAmount,
-                                PaymentReason = pr.PaymentReason,
-                                ApplicantUinType = pr.ApplicantUinTypeId,
-                                ApplicantUin = pr.ApplicantUin,
-                                ApplicantName = pr.ApplicantName,
-                                PaymentReferenceType = pr.PaymentReferenceType,
-                                PaymentReferenceNumber = pr.PaymentReferenceNumber,
-                                PaymentReferenceDate = pr.PaymentReferenceDate,
-                                ExpirationDate = pr.ExpirationDate,
-                                AdditionalInformation = pr.AdditionalInformation,
-                                CreateDate = pr.CreateDate,
-                                EserviceClientAisName = es.AisName,
-                                EserviceClientServiceName = es.ServiceName,
-                                ClientId = es.ClientId,
-                                EserviceClientDepartmentId = es.DepartmentId.ToString()
-                            }),
-                            DepartmentName = depart.Name,
-                            DepartmentUniqueIdentificationNumber = depart.UniqueIdentificationNumber
-                        }
-                    })
+            var result = (from dr in unitOfWork.DbContext.Set<DistributionRevenue>()
+                          join drp in unitOfWork.DbContext.Set<DistributionRevenuePayment>() on dr.DistributionRevenueId equals drp.DistributionRevenueId
+                          join bt in unitOfWork.DbContext.Set<BoricaTransaction>() on drp.BoricaTransactionId equals bt.BoricaTransactionId
+                          join es in unitOfWork.DbContext.Set<EserviceClient>() on drp.EserviceClientId equals es.EserviceClientId
+                          join depart in unitOfWork.DbContext.Set<Department>() on es.DepartmentId equals depart.DepartmentId
+                          where dr.DistributionRevenueId == refid && es.ClientId == clientId
+                          select new
+                          {
+                              BoricaTransactionId = bt.BoricaTransactionId,
+                              DistributionRevenueId = dr.DistributionRevenueId,
+                              requestRefidInfoVO = new RequestRefidInfoVO()
+                              {
+                                  DistributionRevenueId = dr.DistributionRevenueId,
+                                  CreatedAt = dr.CreatedAt,
+                                  Order = bt.Order,
+                                  Amount = bt.Amount,
+                                  TransactionDate = bt.TransactionDate,
+                                  Rrn = bt.Rrn,
+                                  PaymentInfo =
+                                  bt.PaymentRequests.Select(pr => new RequestPaymentInfoParsedVO
+                                  {
+                                      Id = pr.PaymentRequestId.ToString(),
+                                      Status = pr.PaymentRequestStatusId,
+                                      StatusChangeTime = pr.PaymentRequestStatusChangeTime,
+                                      ServiceProviderName = pr.ServiceProviderName,
+                                      ServiceProviderBank = pr.ServiceProviderBank,
+                                      ServiceProviderBIC = pr.ServiceProviderBIC,
+                                      ServiceProviderIBAN = pr.ServiceProviderIBAN,
+                                      Currency = pr.Currency,
+                                      PaymentTypeCode = pr.PaymentTypeCode,
+                                      PaymentAmount = pr.PaymentAmount,
+                                      PaymentReason = pr.PaymentReason,
+                                      ApplicantUinType = pr.ApplicantUinTypeId,
+                                      ApplicantUin = pr.ApplicantUin,
+                                      ApplicantName = pr.ApplicantName,
+                                      PaymentReferenceType = pr.PaymentReferenceType,
+                                      PaymentReferenceNumber = pr.PaymentReferenceNumber,
+                                      PaymentReferenceDate = pr.PaymentReferenceDate,
+                                      ExpirationDate = pr.ExpirationDate,
+                                      AdditionalInformation = pr.AdditionalInformation,
+                                      CreateDate = pr.CreateDate,
+                                      EserviceClientAisName = es.AisName,
+                                      EserviceClientServiceName = es.ServiceName,
+                                      ClientId = es.ClientId,
+                                      EserviceClientDepartmentId = es.DepartmentId.ToString()
+                                  }),
+                                  DepartmentName = depart.Name,
+                                  DepartmentUniqueIdentificationNumber = depart.UniqueIdentificationNumber
+                              }
+                          })
                     .GroupBy(g => g.BoricaTransactionId)
                     .Select(s => s.FirstOrDefault()).ToList()
                     .Select(e => new Tuple<int, RequestRefidInfoVO>(e.DistributionRevenueId, e.requestRefidInfoVO))
                     .ToList();
 
+            decimal sum = decimal.Zero;
+            foreach(var item in result)
+            {
+                sum += item.Item2.Amount;
+            }
+            foreach (var item in result)
+            {
+                item.Item2.TotalSum = sum;
+            }
+
+            return result;
         }
 
         public int GetNumberOfPaymentsByMonth(string request_type, string month)
@@ -631,14 +641,22 @@ namespace EPayments.Data.Repositories.Implementations
             return isRequestExist;
         }
 
-        public bool IsClientAuthorizedToAccessRequests(string clientId, List<string> paymentRequestIdentifiers)
+        public bool IsClientAuthorizedToAccessRequests(string clientId, List<string> paymentRequestIdentifiers, bool authorizeIfClientIdIsPaymentInitiator = false)
         {
-            //checking only found requests by paymentRequestIdentifier
+            if (authorizeIfClientIdIsPaymentInitiator)
+            {
+                return !(from pr in this.unitOfWork.DbContext.Set<PaymentRequest>()
+                         join ini in this.unitOfWork.DbContext.Set<EserviceClient>() on pr.InitiatorId equals ini.EserviceClientId
+                         join esc in this.unitOfWork.DbContext.Set<EserviceClient>() on pr.EserviceClientId equals esc.EserviceClientId
+                         where paymentRequestIdentifiers.Contains(pr.PaymentRequestIdentifier) && esc.ClientId != clientId && ini.ClientId != clientId
+                         select pr)
+                   .Any();
+            }
             return !(from pr in this.unitOfWork.DbContext.Set<PaymentRequest>()
-                    join esc in this.unitOfWork.DbContext.Set<EserviceClient>() on pr.EserviceClientId equals esc.EserviceClientId
-                    where paymentRequestIdentifiers.Contains(pr.PaymentRequestIdentifier) && esc.ClientId != clientId
-                    select pr)
-                    .Any();
+                        join esc in this.unitOfWork.DbContext.Set<EserviceClient>() on pr.EserviceClientId equals esc.EserviceClientId
+                        where paymentRequestIdentifiers.Contains(pr.PaymentRequestIdentifier) && esc.ClientId != clientId
+                        select pr)
+                .Any();
         }
 
         public PaymentRequest GetPaymentRequestByAisPaymentId(int eserviceClientId, string aisPaymentId)

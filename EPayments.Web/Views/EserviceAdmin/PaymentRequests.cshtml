@@ -18,6 +18,22 @@
 
     string confirmSuspendMessage = string.Format("Сигурни ли сте, че искате да промените статуса на задължението на {0} ?", PaymentRequestStatus.Suspended.GetDescription());
     string confirmPayedMessage = string.Format("Сигурни ли сте, че искате да промените статуса на задължението на {0} ?", PaymentRequestStatus.Paid.GetDescription());
+
+    List<SelectListItem> PaymentRequestStatuses = new List<SelectListItem>()
+    {
+        new SelectListItem { Value = string.Empty, Text = "- Всички " }
+    };
+
+    foreach (var status in Model.PaymentRequestStatuses)
+    {
+        SelectListItem selectedListTemp = new SelectListItem()
+        {
+            Value = status.PaymentRequestStatusId.ToString(),
+            Text = status.Name
+        };
+
+        PaymentRequestStatuses.Add(selectedListTemp);
+    }
 }
 
 <script type="text/javascript">
@@ -71,7 +87,7 @@
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label>Номер на заявка</label>
+                                        <label>Номер на задължение</label>
                                         @Html.TextBoxFor(m => m.SearchDO.PrId, new { @class = "form-control no" })
                                     </div>
                                 </div>
@@ -92,21 +108,6 @@
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Вид документ</label>
-                                        @Html.DropDownListFor(m => m.SearchDO.PrPaymentType,
-                                        new List<SelectListItem>()
-                                        {
-                                            new SelectListItem { Value = string.Empty, Text = "- Всички  ( 1,2,3, ... 9 ... други )"},
-                                            new SelectListItem { Value = ((int)PaymentReferenceType.Declaration).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.Declaration), },
-                                            new SelectListItem { Value = ((int)PaymentReferenceType.RevisionAct).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.RevisionAct), },
-                                            new SelectListItem { Value = ((int)PaymentReferenceType.PenalDecree).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.PenalDecree),},
-                                            new SelectListItem { Value = ((int)PaymentReferenceType.PaymentInAdvance).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.PaymentInAdvance), },
-                                            new SelectListItem { Value = ((int)PaymentReferenceType.PartPropertyNumber).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.PartPropertyNumber), },
-                                            new SelectListItem { Value = ((int)PaymentReferenceType.CompulsoryCollectionOrder).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.CompulsoryCollectionOrder), },
-                                            new SelectListItem { Value = ((int)PaymentReferenceType.Others).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.Others), },
-                                        }, new { @class = "form-control" })
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -143,18 +144,7 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label>Статус на плащане</label>
-                                        @Html.DropDownListFor(m => m.SearchDO.PrStatus,
-                                        new List<SelectListItem>()
-                                        {
-                                            new SelectListItem { Value = string.Empty, Text = "- Всички"},
-                                            new SelectListItem { Value = ((int)PaymentRequestStatus.Pending).ToString(), Text = Formatter.EnumToDescriptionString(PaymentRequestStatus.Pending), },
-                                            new SelectListItem { Value = ((int)PaymentRequestStatus.Authorized).ToString(), Text = Formatter.EnumToDescriptionString(PaymentRequestStatus.Authorized), },
-                                            new SelectListItem { Value = ((int)PaymentRequestStatus.Ordered).ToString(), Text = Formatter.EnumToDescriptionString(PaymentRequestStatus.Ordered), },
-                                            new SelectListItem { Value = ((int)PaymentRequestStatus.Paid).ToString(), Text = Formatter.EnumToDescriptionString(PaymentRequestStatus.Paid), },
-                                            new SelectListItem { Value = ((int)PaymentRequestStatus.Expired).ToString(), Text = Formatter.EnumToDescriptionString(PaymentRequestStatus.Expired), },
-                                            new SelectListItem { Value = ((int)PaymentRequestStatus.Canceled).ToString(), Text = Formatter.EnumToDescriptionString(PaymentRequestStatus.Canceled), },
-                                            new SelectListItem { Value = ((int)PaymentRequestStatus.Suspended).ToString(), Text = Formatter.EnumToDescriptionString(PaymentRequestStatus.Suspended), },
-                                        }, new { @class = "form-control" })
+                                        @Html.DropDownListFor(m => m.SearchDO.PrStatus, PaymentRequestStatuses, new { @class = "form-control" })
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
@@ -218,19 +208,18 @@
         <!-- ProcessedPayments table -->
         <div class="results-table" style="@(Model.Requests.Count() == 0 ? "border-bottom: 0px;" : "")">
             <div class="results-thead">
-                <div class="@prPaymentIdColClass">@Html.ActionLink("Номер", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.PaymentId), null)</div>
-                <div class="@prPaymentReferenceIdColClass">@Html.ActionLink("Номер на документ (Референтен номер ORN)", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.PaymentReferenceNumber), null)</div>
+                <div class="@prPaymentIdColClass">@Html.ActionLink("Номер на задължение", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.PaymentId), null)</div>
+                <div class="@prPaymentReferenceIdColClass">@Html.ActionLink("Номер на документ (Референтен номер RNU)", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.PaymentReferenceNumber), null)</div>
                 <div class="@prPaymentReferenceIdColClass">@Html.ActionLink("refid - Номер на платежен документ МЕУ", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.RefIf), null)</div>
                 <div class="@prPaymentReferenceIdColClass">@Html.ActionLink("Вид плащане", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.ObligationType), null)</div>
-                <div class="@prPaymentReferenceIdColClass">@Html.ActionLink("Вид документ", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.PaymentReferenceType), null)</div>
                 <div class="@prPaymentReasonColClass">@Html.ActionLink("Основание за плащане", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.PaymentReason), null)</div>
-                <div class="@prDateColClass">@Html.ActionLink("Дата и час на плащане", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.Date), null)</div>
+                <div class="@prAmountColClass" style="text-align: center;">@Html.ActionLink("Сума", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.Amount), null)</div>
                 <div class="@prApplicantNameColClass">@Html.ActionLink("Задължено лице", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.ApplicantName), null)</div>
 
                 @*<div class="@prServiceProviderColClass">@Html.ActionLink("Получател", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.ServiceProvider), null)</div>*@
 
                 <div class="@prApplicantUinColClass">@Html.ActionLink("ЕГН / ЕИК (Булстат)", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.ApplicantUin), null)</div>
-                <div class="@prAmountColClass" style="text-align: center;">@Html.ActionLink("Сума", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.Amount), null)</div>
+                <div class="@prDateColClass">@Html.ActionLink("Дата и час на плащане", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.Date), null)</div>
                 <div class="@prStatusColClass">@Html.ActionLink("Дата на изтичане на задължението", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.ExpirationDate), null)</div>
                 <div class="@prStatusColClass">@Html.ActionLink("Статус на плащане", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.Status), null)</div>
                 <div class="@prObligationStatusColClass">@Html.ActionLink("Статус на задължение", MVC.EserviceAdmin.ActionNames.PaymentRequestsSort, MVC.EserviceAdmin.Name, Model.SearchDO.ToSortRequestsRouteValues(EserviceAdminRequestColumn.ObligationStatus))</div>
@@ -253,12 +242,12 @@
                         else
                         {
                             <div class="results-cell">
-                                <span class="hidden-lg">Номер номер на заявка:</span>
+                                <span class="hidden-lg">Номер на заявка:</span>
                                 <span class="results-cell-no-status-histories">@payment.PaymentRequestIdentifier</span>
                             </div>
                         }
                         <div class="results-cell">
-                            <span class="hidden-lg">Номер на документ (Референтен номер ORN):</span>
+                            <span class="hidden-lg">Номер на документ (Референтен номер RNU):</span>
                             <span class="label">@payment.PaymentReferenceNumber</span>
                         </div>
                         <div class="results-cell">
@@ -270,30 +259,8 @@
                             <span class="label">@payment.ObligationType</span>
                         </div>
                         <div class="results-cell">
-                            <span class="hidden-lg">Вид документ</span>
-                            <span class="label">@payment.PaymentReferenceType</span>
-                        </div>
-                        <div class="results-cell">
                             <span class="hidden-lg">Основание за плащане:</span>
                             <span class="label">@payment.PaymentReason</span>
-                        </div>
-
-                        <div class="results-cell">
-                            <span class="hidden-lg">Дата и час на плащане:</span>
-                            <span class="label">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSecondsNotLocalTime(payment.TransactionDate))</span>
-                        </div>
-
-                        <div class="results-cell">
-                            <span class="hidden-lg">Задължено лице:</span>
-                            <span class="label">@payment.ApplicantName</span>
-                        </div>
-                        @*<div class="results-cell">
-                                <span class="hidden-lg">Получател:</span>
-                                <span class="label">@payment.ServiceProviderName</span>
-                            </div>*@
-                        <div class="results-cell">
-                            <span class="hidden-lg">ЕГН / ЕИК (Булстат):</span>
-                            <span class="label">@payment.ApplicantUin</span>
                         </div>
                         <div class="results-cell">
                             @*big resolution layout - PaymentAmountRequest*@
@@ -303,6 +270,22 @@
                             @*small resolution layout - PaymentAmountRequest*@
                             <span class="hidden-lg">Сума:</span>
                             <span class="label hidden-lg"><strong>@(EPayments.Common.Helpers.Formatter.DecimalToTwoDecimalPlacesFormat(payment.PaymentAmountRequest) + " лв.")</strong></span>
+                        </div>
+                        <div class="results-cell">
+                            <span class="hidden-lg">Задължено лице:</span>
+                            <span class="label">@payment.ApplicantName</span>
+                        </div>
+                        @*<div class="results-cell">
+            <span class="hidden-lg">Получател:</span>
+            <span class="label">@payment.ServiceProviderName</span>
+        </div>*@
+                        <div class="results-cell">
+                            <span class="hidden-lg">ЕГН / ЕИК (Булстат):</span>
+                            <span class="label">@payment.ApplicantUin</span>
+                        </div>
+                        <div class="results-cell">
+                            <span class="hidden-lg">Дата и час на плащане:</span>
+                            <span class="label">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSecondsNotLocalTime(payment.TransactionDate))</span>
                         </div>
                         <div class="results-cell">
                             <span class="hidden-lg">Дата на изтичане на задължението:</span>

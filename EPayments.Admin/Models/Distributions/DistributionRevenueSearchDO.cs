@@ -4,6 +4,8 @@ namespace EPayments.Admin.Models.Distributions
 {
     public class DistributionRevenueSearchDO
     {
+        public int? DistributionRevenueId { get; set; }
+
         public string StartDate { get; set; }
 
         public string EndDate { get; set; }
@@ -49,6 +51,7 @@ namespace EPayments.Admin.Models.Distributions
         CreatedAt,
         DistributedDate,
         IsDistributed,
+        Refid,
         TotalSum,
         IsFileGenerated,
         DistributionType,

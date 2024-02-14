@@ -1371,8 +1371,7 @@ namespace EPayments.Data.Repositories.Implementations
 
             sortalbleQuery = sourceQuery
                     .OrderBy(e => e.ObligationTypeId)
-                    .ThenBy(e => e.PayOrder)
-                    .ThenBy(e => e.AdditionalInfo);
+                    .ThenBy(e => e.CreateDate);
 
             return sortalbleQuery;
         }
@@ -2060,6 +2059,7 @@ namespace EPayments.Data.Repositories.Implementations
                         PaymentRequestStatusId = pr.PaymentRequestStatusId,
                         ObligationType = pr.ObligationType.Name,
                         ObligationTypeCode = pr.ObligationType.PaymentTypeCode,
+                        ObligationTypeAlgorithmId = pr.ObligationType.AlgorithmId,
                         AdditionalInformation = pr.AdditionalInformation
                     })
                    .SingleOrDefault();

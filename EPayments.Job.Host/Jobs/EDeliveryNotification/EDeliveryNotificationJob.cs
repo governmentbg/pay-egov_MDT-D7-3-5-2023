@@ -163,8 +163,7 @@ namespace EPayments.Job.Host.Jobs.EDeliveryNotification
 
                         notificationlog = jobRepository.GetDeliveryEserviceNotificationById(notificationId);
 
-                        // client wants notifications to be stopped for payment requests
-                        // with algorithm 1 and statuses { Paid, ForDistribution, CheckedAccount }
+                        // notifications are stopped for payment requests with algorithm 1 and 2 and obligation statuses { Paid, ForDistribution, CheckedAccount }
                         int algorithmId = notificationlog.PaymentRequest.ObligationType.AlgorithmId;
                         if ((algorithmId == 1 || algorithmId == 2) &&
                             (
@@ -179,6 +178,7 @@ namespace EPayments.Job.Host.Jobs.EDeliveryNotification
                             continue;
                         }
 
+                        // notifications are stopped for payment requests with algorithm 1 and 2 and request statuses different than Paid
                         if ((algorithmId == 1 || algorithmId == 2) && notificationlog.PaymentRequest.PaymentRequestStatusId != PaymentRequestStatus.Paid)
                         {
                             JobLogger.Get(JobName.EserviceNotification).Log(LogLevel.Info, $"EDeliveryNotification has been detected for remove with PR-Id {notificationlog.PaymentRequestId}");

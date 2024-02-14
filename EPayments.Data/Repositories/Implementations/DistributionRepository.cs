@@ -23,7 +23,7 @@ namespace EPayments.Data.Repositories.Implementations
             DateTime? endDate,
             int? distributionTypeId)
         {
-            return await this.GetWhereClause(this.UnitOfWork.DbContext.Set<DistributionRevenue>(), startDate, endDate, distributionTypeId)
+            return await this.GetWhereClause(this.UnitOfWork.DbContext.Set<DistributionRevenue>(), startDate, endDate, distributionTypeId, null)
                 .CountAsync();
         }
 
@@ -91,10 +91,11 @@ namespace EPayments.Data.Repositories.Implementations
             DateTime? startDate,
             DateTime? endDate,
             int? distributionTypeId,
+            int? distributionRevenueId,
             string sortByPropertyName,
             bool isDescending)
         {
-            IQueryable<DistributionRevenue> query = this.GetWhereClause(this.UnitOfWork.DbContext.Set<DistributionRevenue>(), startDate, endDate, distributionTypeId);
+            IQueryable<DistributionRevenue> query = this.GetWhereClause(this.UnitOfWork.DbContext.Set<DistributionRevenue>(), startDate, endDate, distributionTypeId, distributionRevenueId);
             query = this.SortClause(query, sortByPropertyName, isDescending);
             query = query.Skip((currentPage - 1) * pageLength).Take(pageLength);
 
@@ -134,7 +135,8 @@ namespace EPayments.Data.Repositories.Implementations
             IQueryable<DistributionRevenue> query,
             DateTime? startDate,
             DateTime? endDate,
-            int? distributionTypeId)
+            int? distributionTypeId,
+            int? distributionRevenueId)
         {
             if (startDate != null)
             {
@@ -151,6 +153,13 @@ namespace EPayments.Data.Repositories.Implementations
                 int distribtutionId = (int)distributionTypeId;
 
                 query = query.Where(dr => dr.DistributionTypeId == distribtutionId);
+            }
+
+            if (distributionRevenueId != null)
+            {
+                int refid = (int)distributionRevenueId;
+
+                query = query.Where(dr => dr.DistributionRevenueId == refid);
             }
 
             return query;

@@ -1,7 +1,9 @@
 ﻿using EPayments.Common.DataObjects;
 using EPayments.Common.Helpers;
 using EPayments.Data.ViewObjects.Web;
+using EPayments.Model.DataObjects;
 using EPayments.Model.Enums;
+using Newtonsoft.Json;
 using System;
 
 namespace EPayments.Web.Models.Shared
@@ -37,7 +39,9 @@ namespace EPayments.Web.Models.Shared
         public string CanceledRequestStatusDesc { get; set; }
         public string ObligationType { get; set; }
         public string ObligationTypeCode { get; set; }
+        public int ObligationTypeAlgorithmId { get; set; }
         public string AdditionalInformation { get; set; }
+        public MDT_ExtendedInfoJson AdditionalInfoModel { get; set; }
 
         public OrderVM(PaymentOrderVO paymentOrderVO, AuthRequestDO externalRequestDO = null, bool isEserviceAdminAccess = false)
         {
@@ -81,7 +85,18 @@ namespace EPayments.Web.Models.Shared
             this.PaymentRequestStatusId = paymentOrderVO.PaymentRequestStatusId;
             this.ObligationType = paymentOrderVO.ObligationType;
             this.ObligationTypeCode = paymentOrderVO.ObligationTypeCode;
+            this.ObligationTypeAlgorithmId = paymentOrderVO.ObligationTypeAlgorithmId;
             this.AdditionalInformation = paymentOrderVO.AdditionalInformation;
+            if (!string.IsNullOrEmpty(this.AdditionalInformation))
+            {
+                try
+                {
+                    this.AdditionalInfoModel = JsonConvert.DeserializeObject<MDT_ExtendedInfoJson>(paymentOrderVO.AdditionalInformation);
+                }
+                catch (Exception)
+                {
+                }
+            }
         }
     }
 }

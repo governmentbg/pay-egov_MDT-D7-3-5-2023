@@ -51,6 +51,7 @@ namespace EPayments.Model
             modelBuilder.Configurations.Add(new DistributionRevenuePaymentsMap());
             modelBuilder.Configurations.Add(new DistributionErrorMap());
             modelBuilder.Configurations.Add(new BoricaTransactionStatusMap());
+            modelBuilder.Configurations.Add(new PaymentRequestStatusMap());
         }
     }
 }

@@ -4,11 +4,11 @@
 
 @{
     string prPaymentRequestIdentifierName = "Номер";
-    string prCreateDateName = "Дата и час";
-    string prExpirationDateName = "Валидно до";
+    string prObligationType = "Вид на задължението";
     string prServiceProvider = "Получател";
     string prPaymentReasonName = "Основание за плащане";
-    string prObligationType = "Основание за плащане";
+    string prCreateDateName = "Дата и час";
+    string prExpirationDateName = "Валидно до";
     string prPaymentAmountName = "Сума";
     string prStatusName = "Статус";
 }
@@ -17,11 +17,11 @@
     <thead>
         <tr>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prPaymentRequestIdentifierName</th>
-            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prCreateDateName</th>
-            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prExpirationDateName</th>
+            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prObligationType</th>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prServiceProvider</th>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prPaymentReasonName</th>
-            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prObligationType</th>
+            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prCreateDateName</th>
+            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prExpirationDateName</th>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prPaymentAmountName</th>
         </tr>
     </thead>
@@ -33,11 +33,11 @@
             {
                 <tr class="results-row">
                     <td style="border: 1px solid #333;border-collapse: collapse;">@payment.PaymentRequestIdentifier</td>
-                    <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSeconds(payment.CreateDate))</td>
-                    <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSeconds(payment.ExpirationDate))</td>
+                    <td style="border: 1px solid #333;border-collapse: collapse;">@payment.ObligationType</td>
                     <td style="border: 1px solid #333;border-collapse: collapse;">@payment.ServiceProviderName</td>
                     <td style="border: 1px solid #333;border-collapse: collapse;">@payment.PaymentReason</td>
-                    <td style="border: 1px solid #333;border-collapse: collapse;">@payment.ObligationType</td>
+                    <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSeconds(payment.CreateDate))</td>
+                    <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSeconds(payment.ExpirationDate))</td>
                     <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DecimalToTwoDecimalPlacesFormat(payment.PaymentAmount) + " лв.")</td>
                 </tr>
             }
@@ -56,10 +56,10 @@
     <thead>
         <tr>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prPaymentRequestIdentifierName</th>
-            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prCreateDateName</th>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prServiceProvider</th>
-            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prPaymentReasonName</th>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prObligationType</th>
+            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prPaymentReasonName</th>
+            <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prCreateDateName</th>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prPaymentAmountName</th>
             <th class="results-cell" style="border: 1px solid #333;border-collapse: collapse;">@prStatusName</th>
         </tr>
@@ -72,10 +72,10 @@
             {
                 <tr class="results-row">
                     <td style="border: 1px solid #333;border-collapse: collapse;">@payment.PaymentRequestIdentifier</td>
-                    <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSeconds(payment.TransactionDate))</td>
                     <td style="border: 1px solid #333;border-collapse: collapse;">@payment.ServiceProviderName</td>
-                    <td style="border: 1px solid #333;border-collapse: collapse;">@payment.PaymentReason</td>
                     <td style="border: 1px solid #333;border-collapse: collapse;">@payment.ObligationType</td>
+                    <td style="border: 1px solid #333;border-collapse: collapse;">@payment.PaymentReason</td>
+                    <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DateTimeToBgFormatWithoutSeconds(payment.TransactionDate))</td>
                     <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.DecimalToTwoDecimalPlacesFormat(payment.PaymentAmountRequest) + " лв.")</td>
                     <td style="border: 1px solid #333;border-collapse: collapse;">@(EPayments.Common.Helpers.Formatter.EnumToDescriptionString(payment.PaymentRequestStatusId))</td>
                 </tr>

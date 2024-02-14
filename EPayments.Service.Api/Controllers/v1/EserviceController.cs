@@ -260,7 +260,7 @@ namespace EPayments.Service.Api.Controllers.v1
                 throw new CustomServiceException("An error occurred when attempting to parse data. Please ensure that POST data is in correct format.");
             }
 
-            GetEserviceAuthorizer(requestDO.ClientId).PermitAccessToRequests(requestIds);
+            GetEserviceAuthorizer(requestDO.ClientId).PermitAccessToRequests(requestIds, authorizeIfClientIdIsPaymentInitiator: true);
 
             var foundRequests = this.apiRepository.GetRequestXmlsByIndetifiers(requestIds);
 
@@ -302,7 +302,7 @@ namespace EPayments.Service.Api.Controllers.v1
                 throw new CustomServiceException("An error occurred when attempting to parse data. Please ensure that POST data is in correct format.");
             }
 
-            GetEserviceAuthorizer(requestDO.ClientId).PermitAccessToRequests(requestIds);
+            GetEserviceAuthorizer(requestDO.ClientId).PermitAccessToRequests(requestIds, authorizeIfClientIdIsPaymentInitiator: true);
 
             var foundRequests = this.apiRepository.GetRequestStatusesByIdentifiers(requestIds);
 

@@ -1464,6 +1464,22 @@ namespace EPayments.Common
             }
         }
 
+        public static int EPaymentsJobHost_BoricaRetryPeriodInSeconds
+        {
+            get
+            {
+                return GetAppConfigValue<int>("EPayments.Job.Host:BoricaRetryPeriodInSeconds");
+            }
+        }
+
+        public static int EPaymentsJobHost_BoricaRetryCount
+        {
+            get
+            {
+                return GetAppConfigValue<int>("EPayments.Job.Host:BoricaRetryCount");
+            }
+        }
+
         #endregion
 
         #region EPayments.Common

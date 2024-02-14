@@ -23,13 +23,16 @@
 
     foreach (var obligationType in PaymentRequestDO.ObligationTypesList)
     {
-        SelectListItem selectedListTemp = new SelectListItem()
+        if (obligationType.AlgorithmId == 0 && obligationType.IsActive)
         {
-            Value = obligationType.ObligationTypeId.ToString(),
-            Text = obligationType.Name + " | " + obligationType.PaymentTypeCode
-        };
+            SelectListItem selectedListTemp = new SelectListItem()
+            {
+                Value = obligationType.ObligationTypeId.ToString(),
+                Text = obligationType.Name + " | " + obligationType.PaymentTypeCode
+            };
 
-        ObligationType.Add(selectedListTemp);
+            ObligationType.Add(selectedListTemp);
+        }
     }
 }
 
@@ -67,14 +70,13 @@
             @Html.DropDownListFor(m => m.PaymentReferenceType,
             new List<SelectListItem>()
             {
-                new SelectListItem { Value = string.Empty, Text = "- Всички  ( 1,2,3, ... 9 ... други )"},
+                    new SelectListItem { Value = ((int)PaymentReferenceType.Others).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.Others), },
                     new SelectListItem { Value = ((int)PaymentReferenceType.Declaration).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.Declaration), },
                     new SelectListItem { Value = ((int)PaymentReferenceType.RevisionAct).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.RevisionAct), },
                     new SelectListItem { Value = ((int)PaymentReferenceType.PenalDecree).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.PenalDecree),},
                     new SelectListItem { Value = ((int)PaymentReferenceType.PaymentInAdvance).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.PaymentInAdvance), },
                     new SelectListItem { Value = ((int)PaymentReferenceType.PartPropertyNumber).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.PartPropertyNumber), },
                     new SelectListItem { Value = ((int)PaymentReferenceType.CompulsoryCollectionOrder).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.CompulsoryCollectionOrder), },
-                    new SelectListItem { Value = ((int)PaymentReferenceType.Others).ToString(), Text = Formatter.EnumToDescriptionString(PaymentReferenceType.Others), },
             }, new { @class = "form-control chosen" })
 
             @*@Html.TextBoxFor(m => m.PaymentReferenceType, new { @class = "form-control", AutoComplete = "Off" })*@

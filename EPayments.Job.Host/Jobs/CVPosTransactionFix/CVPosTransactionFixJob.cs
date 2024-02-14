@@ -128,12 +128,15 @@ namespace EPayments.Job.Host.Jobs.CVPosTransactionFix
                         JobLogger.Get(JobName.CVPosTransactionFix).Log(LogLevel.Info, $"ProcessPendingCVposFixRequest -> cVposTransaction_Agency:{agency}, " +
                             $"cVposTransaction_Event:{cVposTransaction_Event}, startDate:{startDate}, AppSettings.EPaymentsWeb_CentralVposDevTerminalId:{AppSettings.EPaymentsWeb_CentralVposDevTerminalId}");
 
-                        recEventTransaction[] recEventTransactions = CVPosRegisterManager.GetTransactionPerDate(
-                            agency,
-                            cVposTransaction_Event,
-                            startDate,
-                            AppSettings.EPaymentsWeb_CentralVposDevTerminalId);
-
+                        recEventTransaction[] recEventTransactions = BoricaRetryPolicy.GetBoricaRetryPolicy(JobName.CVPosTransactionFix).Execute(() =>
+                        {
+                            return CVPosRegisterManager.GetTransactionPerDate(
+                               agency,
+                               cVposTransaction_Event,
+                               startDate,
+                               AppSettings.EPaymentsWeb_CentralVposDevTerminalId);
+                        });
+                       
                         if (recEventTransactions == null || recEventTransactions.Length == 0)
                         {
                             JobLogger.Get(JobName.CVPosTransactionFix).Log(LogLevel.Info, String.Format("Няма данни за минал сетълмент на дата {0}. Проверката е направена на {1}", startDate, DateTime.Now));

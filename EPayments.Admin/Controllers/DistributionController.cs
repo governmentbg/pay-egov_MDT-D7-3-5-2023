@@ -317,6 +317,7 @@ namespace EPayments.Admin.Controllers
                 Parser.GetDateFirstMinute(Parser.BgFormatDateStringToDateTime(searchDO.StartDate)),
                 Parser.GetDateLastMinute(Parser.BgFormatDateStringToDateTime(searchDO.EndDate)),
                 searchDO.DistributionType,
+                searchDO.DistributionRevenueId,
                 Enum.GetName(searchDO.SortBy.GetType(), searchDO.SortBy),
                 searchDO.SortDesc);
         }

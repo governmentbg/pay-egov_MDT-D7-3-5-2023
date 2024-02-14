@@ -271,11 +271,11 @@ namespace EPayments.Web.Controllers
 
             //Set column headers
             worksheet.Cell("A2").Value = "Номер";
-            worksheet.Cell("B2").Value = "Дата и час";
-            worksheet.Cell("C2").Value = "Валидно до";
-            worksheet.Cell("D2").Value = "Получател";
-            worksheet.Cell("E2").Value = "Основание за плащане";
-            worksheet.Cell("F2").Value = "Вид на задължението";
+            worksheet.Cell("B2").Value = "Вид на задължението";
+            worksheet.Cell("C2").Value = "Получател";
+            worksheet.Cell("D2").Value = "Основание за плащане";
+            worksheet.Cell("E2").Value = "Дата и час";
+            worksheet.Cell("F2").Value = "Валидно до";
             worksheet.Cell("G2").Value = "Сума";
 
             worksheet.Cell("A2").Style.Font.Bold = true;
@@ -293,11 +293,11 @@ namespace EPayments.Web.Controllers
                 for (int i = 0; i < pendingPayments.Count; i++)
                 {
                     worksheet.Cell(String.Format("A{0}", i + 3)).SetValue<string>(pendingPayments[i].PaymentRequestIdentifier);
-                    worksheet.Cell(String.Format("B{0}", i + 3)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSeconds(pendingPayments[i].CreateDate));
-                    worksheet.Cell(String.Format("C{0}", i + 3)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSeconds(pendingPayments[i].ExpirationDate));
-                    worksheet.Cell(String.Format("D{0}", i + 3)).SetValue<string>(pendingPayments[i].ServiceProviderName);
-                    worksheet.Cell(String.Format("E{0}", i + 3)).SetValue<string>(pendingPayments[i].PaymentReason);
-                    worksheet.Cell(String.Format("F{0}", i + 3)).SetValue<string>(pendingPayments[i].ObligationType);
+                    worksheet.Cell(String.Format("B{0}", i + 3)).SetValue<string>(pendingPayments[i].ObligationType);
+                    worksheet.Cell(String.Format("C{0}", i + 3)).SetValue<string>(pendingPayments[i].ServiceProviderName);
+                    worksheet.Cell(String.Format("D{0}", i + 3)).SetValue<string>(pendingPayments[i].PaymentReason);
+                    worksheet.Cell(String.Format("E{0}", i + 3)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSeconds(pendingPayments[i].CreateDate));
+                    worksheet.Cell(String.Format("F{0}", i + 3)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSeconds(pendingPayments[i].ExpirationDate));
                     worksheet.Cell(String.Format("G{0}", i + 3)).SetValue<string>(Formatter.DecimalToTwoDecimalPlacesFormat(pendingPayments[i].PaymentAmount) + " лв.");
                 }
 
@@ -316,10 +316,10 @@ namespace EPayments.Web.Controllers
             nextStartIndex++;
 
             worksheet.Cell(string.Format("A{0}", nextStartIndex)).Value = "Номер";
-            worksheet.Cell(string.Format("B{0}", nextStartIndex)).Value = "Дата и час";
-            worksheet.Cell(string.Format("C{0}", nextStartIndex)).Value = "Получател";
+            worksheet.Cell(string.Format("B{0}", nextStartIndex)).Value = "Получател";
+            worksheet.Cell(string.Format("C{0}", nextStartIndex)).Value = "Вид на задължението";
             worksheet.Cell(string.Format("D{0}", nextStartIndex)).Value = "Основание за плащане";
-            worksheet.Cell(string.Format("E{0}", nextStartIndex)).Value = "Вид на задължението";
+            worksheet.Cell(string.Format("E{0}", nextStartIndex)).Value = "Дата и час";
             worksheet.Cell(string.Format("F{0}", nextStartIndex)).Value = "Платена сума";
             worksheet.Cell(string.Format("G{0}", nextStartIndex)).Value = "Статус";
 
@@ -338,10 +338,10 @@ namespace EPayments.Web.Controllers
                 for (int i = 0; i < processedPayments.Count; i++)
                 {
                     worksheet.Cell(String.Format("A{0}", i + nextStartIndex)).SetValue<string>(processedPayments[i].PaymentRequestIdentifier);
-                    worksheet.Cell(String.Format("B{0}", i + nextStartIndex)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSeconds(processedPayments[i].TransactionDate));
-                    worksheet.Cell(String.Format("C{0}", i + nextStartIndex)).SetValue<string>(processedPayments[i].ServiceProviderName);
+                    worksheet.Cell(String.Format("B{0}", i + nextStartIndex)).SetValue<string>(processedPayments[i].ServiceProviderName);
+                    worksheet.Cell(String.Format("C{0}", i + nextStartIndex)).SetValue<string>(processedPayments[i].ObligationType);
                     worksheet.Cell(String.Format("D{0}", i + nextStartIndex)).SetValue<string>(processedPayments[i].PaymentReason);
-                    worksheet.Cell(String.Format("E{0}", i + nextStartIndex)).SetValue<string>(processedPayments[i].ObligationType);
+                    worksheet.Cell(String.Format("E{0}", i + nextStartIndex)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSeconds(processedPayments[i].TransactionDate));
                     worksheet.Cell(String.Format("F{0}", i + nextStartIndex)).SetValue<string>(Formatter.DecimalToTwoDecimalPlacesFormat(processedPayments[i].PaymentAmountRequest) + " лв.");
                     worksheet.Cell(String.Format("G{0}", i + nextStartIndex)).SetValue<string>(Formatter.EnumToDescriptionString(processedPayments[i].PaymentRequestStatusId));
                 }

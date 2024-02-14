@@ -71,7 +71,7 @@
     <div class="table-filters">
         <span class="filter-toggle opened">Търсене</span>
 
-        @using (Html.BeginForm(MVC.PaymentRequest.ActionNames.List, MVC.PaymentRequest.Name, null, FormMethod.Get, new { @class = "clearfix", style = "display: block;", @id= "actionForm" }))
+        @using (Html.BeginForm(MVC.PaymentRequest.ActionNames.ListSearch, MVC.PaymentRequest.Name, null, FormMethod.Post, new { @class = "clearfix", style = "display: block;", @id= "actionForm" }))
         {
             @Html.HiddenFor(m => m.SearchDO.PrSortBy)
             @Html.HiddenFor(m => m.SearchDO.PrSortDesc)

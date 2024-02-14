@@ -93,173 +93,171 @@ namespace EPayments.Job.Host.Jobs.BoricaUnprocessedRequests
                     {
                         Thread.Sleep(timeToWait);
 
-                        APGWStatusCheckRequestDataVO apgwRequest = CreateBoricaRequestData(boricaTransaction);
-
-                        string content = null;
-
-                        HttpResponseMessage response = null;
-
                         try
                         {
-                            using (HttpClient httpClient = new HttpClient())
+                            APGWStatusCheckRequestDataVO apgwRequest = CreateBoricaRequestData(boricaTransaction);
+
+                            string content = null;
+
+                            HttpResponseMessage response = BoricaRetryPolicy.GetBoricaRetryPolicy(JobName.BoricaUnprocessedRequestsJob).Execute(() =>
                             {
-                                response = httpClient.PostAsync(apgwRequest.PostUrl, new FormUrlEncodedContent(apgwRequest.RequestFields())).Result;
+                                using (HttpClient httpClient = new HttpClient())
+                                {
+                                    return httpClient.PostAsync(apgwRequest.PostUrl, new FormUrlEncodedContent(apgwRequest.RequestFields())).Result;
+                                }
+                            });
+
+                            if (response.StatusCode == HttpStatusCode.OK)
+                            {
+                                content = response.Content.ReadAsStringAsync().Result;
+
+                                Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+
+                                APGWPaymentResponseDataDO apgwResponse = new APGWPaymentResponseDataDO();
+                                apgwResponse.ParseFromDictionary(values);
+                                JobLogger.Get(JobName.BoricaUnprocessedRequestsJob).Log(LogLevel.Info, $"borica transaction id{boricaTransaction.BoricaTransactionId} response: {JsonConvert.SerializeObject(apgwResponse)}");
+
+                                if (VerifyResponse(apgwResponse))
+                                {
+                                    if (apgwResponse.Action == 0 && apgwResponse.Rc == "00")
+                                    {
+                                        apgwResponse.UpdateBoricaTransactionSuccessPayment(boricaTransaction);
+
+                                        string[] applicantUins = boricaTransaction.PaymentRequests
+                                            .Where(pr => !string.IsNullOrWhiteSpace(pr.ApplicantUin))
+                                            .Select(pr => pr.ApplicantUin)
+                                            .ToArray();
+
+                                        User[] users = unitOfWork.DbContext.Set<User>()
+                                            .Where(u => applicantUins.Contains(u.Egn))
+                                            .ToArray();
+
+                                        foreach (var paymentRequest in boricaTransaction.PaymentRequests)
+                                        {
+                                            if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.Paid)
+                                            {
+                                                continue;
+                                            }
+
+                                            paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Paid;
+                                            paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
+
+                                            if (paymentRequest.ObligationStatusId == null
+                                                || paymentRequest.ObligationStatusId == ObligationStatusEnum.Ordered
+                                                || paymentRequest.ObligationStatusId == ObligationStatusEnum.Asked)
+                                            {
+                                                paymentRequest.ObligationStatusId = ObligationStatusEnum.IrrevocableOrder;
+                                            }
+
+                                            User user = users.FirstOrDefault(u => string.Equals(u.Egn, paymentRequest.ApplicantUin, StringComparison.OrdinalIgnoreCase));
+
+                                            if (user != null && !String.IsNullOrWhiteSpace(user.Email))
+                                            {
+                                                if (user.StatusObligationNotifications)
+                                                {
+                                                    unitOfWork.DbContext.Set<Mail>().Add(user.CreateStatusObligationNotificationEmail(paymentRequest));
+                                                }
+
+                                                if (user.StatusNotifications)
+                                                {
+                                                    unitOfWork.DbContext.Set<Mail>().Add(user.CreateStatusNotificationEmail(paymentRequest));
+                                                }
+                                            }
+
+                                            if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
+                                            {
+                                                Notification statusNotification = new Notification(paymentRequest, (int?)null);
+
+                                                unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
+                                            }
+                                        }
+
+                                        unitOfWork.Save();
+                                    }
+                                    else if (apgwResponse.Rc != "00" && !apgwResponse.Rc.StartsWith("-"))
+                                    {
+                                        foreach (var paymentRequest in boricaTransaction.PaymentRequests)
+                                        {
+                                            if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.InProcess)
+                                            {
+                                                paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Pending;
+                                                paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
+
+                                                if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
+                                                {
+                                                    Notification statusNotification = new Notification(paymentRequest, (int?)null);
+
+                                                    unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
+                                                }
+                                            }
+                                        }
+                                        apgwResponse.UpdateBoricaTransactionCanceledPayment(boricaTransaction);
+                                        unitOfWork.Save();
+                                    }
+                                    else if (apgwRequest.TRAN_TRTYPE == TrTypeEnum.Check && boricaTransaction.TransactionDate.AddMinutes(20) <= DateTime.Now)
+                                    {
+                                        foreach (var paymentRequest in boricaTransaction.PaymentRequests)
+                                        {
+                                            if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.InProcess)
+                                            {
+                                                paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Canceled;
+                                                paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
+
+                                                if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
+                                                {
+                                                    Notification statusNotification = new Notification(paymentRequest, (int?)null);
+
+                                                    unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
+                                                }
+                                            }
+
+                                        }
+
+                                        apgwResponse.UpdateBoricaTransactionCanceledPayment(boricaTransaction);
+                                        unitOfWork.Save();
+                                    }
+                                    else if (boricaTransaction.TransactionDate.AddMinutes(20) <= DateTime.Now)
+                                    {
+                                        foreach (var paymentRequest in boricaTransaction.PaymentRequests)
+                                        {
+                                            if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.InProcess)
+                                            {
+                                                paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Pending;
+                                                paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
+
+                                                if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
+                                                {
+                                                    Notification statusNotification = new Notification(paymentRequest, (int?)null);
+
+                                                    unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
+                                                }
+                                            }
+
+                                        }
+
+                                        apgwResponse.UpdateBoricaTransactionCanceledPayment(boricaTransaction);
+                                        unitOfWork.Save();
+                                    }
+                                }
+                                else
+                                {
+                                    JobLogger.Get(JobName.BoricaUnprocessedRequestsJob).Log(LogLevel.Warn,
+                                        string.Format("Грешка при опит на прочитане на данните от Борика. Моля проверете сертификата. Транзакция - {0}, дата - {1}",
+                                        boricaTransaction.Order,
+                                        DateTime.Now.ToLongDateString()));
+                                }
+                            }
+
+                            if (boricaTransaction.TransactionStatusId == pendingPayment &&
+                                boricaTransaction.TransactionDate.AddHours(finalLimit) < transactionStartDate)
+                            {
+                                boricaTransaction.TransactionStatusId = cancelPayment;
+                                unitOfWork.Save();
                             }
                         }
                         catch (Exception ex)
                         {
-                            JobLogger.Get(JobName.BoricaUnprocessedRequestsJob).Log(LogLevel.Warn,
-                                string.Format("Грешка при опит за взимане на данни от Борика. {0}", $"{ex.Message}, StackTrace -> {ex.StackTrace}"));
-
-                            throw;
-                        }
-
-                        if (response.StatusCode == HttpStatusCode.OK)
-                        {
-                            content = response.Content.ReadAsStringAsync().Result;
-
-                            Dictionary<string, object> values = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
-
-                            APGWPaymentResponseDataDO apgwResponse = new APGWPaymentResponseDataDO();
-                            apgwResponse.ParseFromDictionary(values);
-                            JobLogger.Get(JobName.BoricaUnprocessedRequestsJob).Log(LogLevel.Info, $"borica transaction id{boricaTransaction.BoricaTransactionId} response: {JsonConvert.SerializeObject(apgwResponse)}");
-
-                            if (VerifyResponse(apgwResponse))
-                            {
-                                if (apgwResponse.Action == 0 && apgwResponse.Rc == "00")
-                                {
-                                    apgwResponse.UpdateBoricaTransactionSuccessPayment(boricaTransaction);
-
-                                    string[] applicantUins = boricaTransaction.PaymentRequests
-                                        .Where(pr => !string.IsNullOrWhiteSpace(pr.ApplicantUin))
-                                        .Select(pr => pr.ApplicantUin)
-                                        .ToArray();
-
-                                    User[] users = unitOfWork.DbContext.Set<User>()
-                                        .Where(u => applicantUins.Contains(u.Egn))
-                                        .ToArray();
-
-                                    foreach (var paymentRequest in boricaTransaction.PaymentRequests)
-                                    {
-                                        if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.Paid)
-                                        {
-                                            continue;
-                                        }
-
-                                        paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Paid;
-                                        paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
-
-                                        if (paymentRequest.ObligationStatusId == null
-                                            || paymentRequest.ObligationStatusId == ObligationStatusEnum.Ordered
-                                            || paymentRequest.ObligationStatusId == ObligationStatusEnum.Asked)
-                                        {
-                                            paymentRequest.ObligationStatusId = ObligationStatusEnum.IrrevocableOrder;
-                                        }
-
-                                        User user = users.FirstOrDefault(u => string.Equals(u.Egn, paymentRequest.ApplicantUin, StringComparison.OrdinalIgnoreCase));
-
-                                        if (user != null && !String.IsNullOrWhiteSpace(user.Email))
-                                        {
-                                            if (user.StatusObligationNotifications)
-                                            {
-                                                unitOfWork.DbContext.Set<Mail>().Add(user.CreateStatusObligationNotificationEmail(paymentRequest));
-                                            }
-
-                                            if (user.StatusNotifications)
-                                            {
-                                                unitOfWork.DbContext.Set<Mail>().Add(user.CreateStatusNotificationEmail(paymentRequest));
-                                            }
-                                        }
-
-                                        if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
-                                        {
-                                            Notification statusNotification = new Notification(paymentRequest, (int?)null);
-
-                                            unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
-                                        }
-                                    }
-
-                                    unitOfWork.Save();
-                                }
-                                else if (apgwResponse.Rc != "00" && !apgwResponse.Rc.StartsWith("-"))
-                                {
-                                    foreach (var paymentRequest in boricaTransaction.PaymentRequests)
-                                    {
-                                        if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.InProcess)
-                                        {
-                                            paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Pending;
-                                            paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
-
-                                            if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
-                                            {
-                                                Notification statusNotification = new Notification(paymentRequest, (int?)null);
-
-                                                unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
-                                            }
-                                        }
-                                    }
-                                    apgwResponse.UpdateBoricaTransactionCanceledPayment(boricaTransaction);
-                                    unitOfWork.Save();
-                                }
-                                else if (apgwRequest.TRAN_TRTYPE == TrTypeEnum.Check && boricaTransaction.TransactionDate.AddMinutes(20) <= DateTime.Now)
-                                {
-                                    foreach (var paymentRequest in boricaTransaction.PaymentRequests)
-                                    {
-                                        if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.InProcess)
-                                        {
-                                            paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Canceled;
-                                            paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
-
-                                            if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
-                                            {
-                                                Notification statusNotification = new Notification(paymentRequest, (int?)null);
-
-                                                unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
-                                            }
-                                        }
-
-                                    }
-
-                                    apgwResponse.UpdateBoricaTransactionCanceledPayment(boricaTransaction);
-                                    unitOfWork.Save();
-                                }
-                                else if (boricaTransaction.TransactionDate.AddMinutes(20) <= DateTime.Now)
-                                {
-                                    foreach (var paymentRequest in boricaTransaction.PaymentRequests)
-                                    {
-                                        if (paymentRequest.PaymentRequestStatusId == PaymentRequestStatus.InProcess)
-                                        {
-                                            paymentRequest.PaymentRequestStatusId = PaymentRequestStatus.Pending;
-                                            paymentRequest.PaymentRequestStatusChangeTime = DateTime.Now;
-
-                                            if (!String.IsNullOrWhiteSpace(paymentRequest.AdministrativeServiceNotificationURL))
-                                            {
-                                                Notification statusNotification = new Notification(paymentRequest, (int?)null);
-
-                                                unitOfWork.DbContext.Set<Notification>().Add(statusNotification);
-                                            }
-                                        }
-
-                                    }
-
-                                    apgwResponse.UpdateBoricaTransactionCanceledPayment(boricaTransaction);
-                                    unitOfWork.Save();
-                                }
-                            }
-                            else
-                            {
-                                JobLogger.Get(JobName.BoricaUnprocessedRequestsJob).Log(LogLevel.Warn,
-                                    string.Format("Грешка при опит на прочитане на данните от Борика. Моля проверете сертификата. Транзакция - {0}, дата - {1}",
-                                    boricaTransaction.Order,
-                                    DateTime.Now.ToLongDateString()));
-                            }
-                        }
-
-                        if (boricaTransaction.TransactionStatusId == pendingPayment &&
-                            boricaTransaction.TransactionDate.AddHours(finalLimit) < transactionStartDate)
-                        {
-                            boricaTransaction.TransactionStatusId = cancelPayment;
-                            unitOfWork.Save();
+                            JobLogger.Get(JobName.BoricaUnprocessedRequestsJob).Log(LogLevel.Warn, ex.Message, ex);
                         }
                     }
                 }

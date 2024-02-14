@@ -104,6 +104,8 @@ namespace EPayments.Web.Controllers
                 searchDO.PrPage,
                 AppSettings.EPaymentsWeb_MaxSearchResultsPerPage);
 
+            model.PaymentRequestStatuses = this.unitOfWork.DbContext.Set<PaymentRequestStatusModel>().ToList();
+
             return View(model);
         }
 
@@ -189,17 +191,19 @@ namespace EPayments.Web.Controllers
             var worksheet = workbook.Worksheets.Add("Транзакции");
 
             //Set column headers
-            worksheet.Cell("A1").Value = "Номер";
-            worksheet.Cell("B1").Value = "Референтен номер на задължението";
-            worksheet.Cell("C1").Value = "Дата и час";
-            worksheet.Cell("D1").Value = "Задължение на";
-            worksheet.Cell("E1").Value = "ЕГН / Булстат";
-            worksheet.Cell("F1").Value = "Основание за плащане";
-            worksheet.Cell("G1").Value = "Сума";
-            worksheet.Cell("H1").Value = "Дата на изтичане на задължението";
-            worksheet.Cell("I1").Value = "Статус на плащането";
-            worksheet.Cell("J1").Value = "Статус на задължението";
-            worksheet.Cell("K1").Value = "Допълнителна информация";
+            worksheet.Cell("A1").Value = "Номер на задължение";
+            worksheet.Cell("B1").Value = "Номер на документ (Референтен номер RNU)";
+            worksheet.Cell("C1").Value = "refid - Номер на платежен документ МЕУ";
+            worksheet.Cell("D1").Value = "Вид плащане";
+            worksheet.Cell("E1").Value = "Основание за плащане";
+            worksheet.Cell("F1").Value = "Сума";
+            worksheet.Cell("G1").Value = "Задължено лице";
+            worksheet.Cell("H1").Value = "ЕГН / ЕИК (Булстат)";
+            worksheet.Cell("I1").Value = "Дата и час на плащане";
+            worksheet.Cell("J1").Value = "Дата на изтичане на задължението";
+            worksheet.Cell("K1").Value = "Статус на плащане";
+            worksheet.Cell("L1").Value = "Статус на задължение";
+            worksheet.Cell("M1").Value = "Още пояснения";
 
             worksheet.Cell("A1").Style.Font.Bold = true;
             worksheet.Cell("B1").Style.Font.Bold = true;
@@ -212,20 +216,24 @@ namespace EPayments.Web.Controllers
             worksheet.Cell("I1").Style.Font.Bold = true;
             worksheet.Cell("J1").Style.Font.Bold = true;
             worksheet.Cell("K1").Style.Font.Bold = true;
+            worksheet.Cell("L1").Style.Font.Bold = true;
+            worksheet.Cell("M1").Style.Font.Bold = true;
 
             for (int i = 0; i < requests.Count; i++)
             {
                 worksheet.Cell(String.Format("A{0}", i + 2)).SetValue<string>(requests[i].PaymentRequestIdentifier);
                 worksheet.Cell(String.Format("B{0}", i + 2)).SetValue<string>(requests[i].PaymentReferenceNumber);
-                worksheet.Cell(String.Format("C{0}", i + 2)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSecondsNotLocalTime(requests[i].TransactionDate));
-                worksheet.Cell(String.Format("D{0}", i + 2)).SetValue<string>(requests[i].ApplicantName);
-                worksheet.Cell(String.Format("E{0}", i + 2)).SetValue<string>(requests[i].ApplicantUin);
-                worksheet.Cell(String.Format("F{0}", i + 2)).SetValue<string>(requests[i].PaymentReason);
-                worksheet.Cell(String.Format("G{0}", i + 2)).SetValue<string>(Formatter.DecimalToTwoDecimalPlacesFormat(requests[i].PaymentAmountRequest) + " лв.");
-                worksheet.Cell(String.Format("H{0}", i + 2)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSecondsNotLocalTime(requests[i].ExpirationDate));
-                worksheet.Cell(String.Format("I{0}", i + 2)).SetValue<string>(Formatter.EnumToDescriptionString(requests[i].PaymentRequestStatusId));
-                worksheet.Cell(String.Format("J{0}", i + 2)).SetValue<string>(requests[i].ObligationStatusId != null ? Formatter.EnumToDescriptionString(requests[i].ObligationStatusId) : "Няма стойност");
-                worksheet.Cell(String.Format("K{0}", i + 2)).SetValue<string>(requests[i].AdditionalInformation);
+                worksheet.Cell(String.Format("C{0}", i + 2)).SetValue<string>(requests[i].Refid);
+                worksheet.Cell(String.Format("D{0}", i + 2)).SetValue<string>(requests[i].ObligationType);
+                worksheet.Cell(String.Format("E{0}", i + 2)).SetValue<string>(requests[i].PaymentReason);
+                worksheet.Cell(String.Format("F{0}", i + 2)).SetValue<string>(Formatter.DecimalToTwoDecimalPlacesFormat(requests[i].PaymentAmountRequest) + " лв.");
+                worksheet.Cell(String.Format("G{0}", i + 2)).SetValue<string>(requests[i].ApplicantName);
+                worksheet.Cell(String.Format("H{0}", i + 2)).SetValue<string>(requests[i].ApplicantUin);
+                worksheet.Cell(String.Format("I{0}", i + 2)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSecondsNotLocalTime(requests[i].TransactionDate));
+                worksheet.Cell(String.Format("J{0}", i + 2)).SetValue<string>(Formatter.DateTimeToBgFormatWithoutSecondsNotLocalTime(requests[i].ExpirationDate));
+                worksheet.Cell(String.Format("K{0}", i + 2)).SetValue<string>(Formatter.EnumToDescriptionString(requests[i].PaymentRequestStatusId));
+                worksheet.Cell(String.Format("L{0}", i + 2)).SetValue<string>(requests[i].ObligationStatusId != null ? Formatter.EnumToDescriptionString(requests[i].ObligationStatusId) : "Няма стойност");
+                worksheet.Cell(String.Format("M{0}", i + 2)).SetValue<string>(requests[i].AdditionalInformation);
             }
 
             worksheet.Rows().Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
@@ -242,6 +250,8 @@ namespace EPayments.Web.Controllers
             worksheet.Column("I").AdjustToContents();
             worksheet.Column("J").AdjustToContents();
             worksheet.Column("K").AdjustToContents();
+            worksheet.Column("L").AdjustToContents();
+            worksheet.Column("M").AdjustToContents();
 
             MemoryStream excelStream = new MemoryStream();
             workbook.SaveAs(excelStream);
@@ -264,9 +274,9 @@ namespace EPayments.Web.Controllers
             //model.PaymentRequest.ObligationType = eserviceClient?.ObligationType?.Name ?? string.Empty;
 
 
-            PaymentRequestDO.ObligationTypesList = this.unitOfWork.DbContext.Set<ObligationType>().Where(o => o.ObligationTypeId == 1).ToList();
+            //PaymentRequestDO.ObligationTypesList = this.unitOfWork.DbContext.Set<ObligationType>().Where(o => o.ObligationTypeId == 1).ToList();
             PaymentRequestDO.ObligationTypesList.AddRange(this.unitOfWork.DbContext.Set<ObligationType>()
-                                                                        .Where(o => o.AlgorithmId == 1)
+                                                                        .Where(o => o.AlgorithmId == 0)
                                                                         .Where(o => o.IsActive == true).ToList());
             return View(model);
         }
@@ -297,6 +307,7 @@ namespace EPayments.Web.Controllers
                 model.PaymentReferenceType = " ";
             }
 
+            int obligationTypeId = int.Parse(model.ObligationType);
             string body = Convert.ToBase64String(
                 System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new
                 {
@@ -315,7 +326,8 @@ namespace EPayments.Web.Controllers
                     paymentReferenceDate = DateTime.Now.ToString("s"),
                     expirationDate = model.ExpirationDate.ToString("s"),
                     paymentReferenceType = int.Parse(model.PaymentReferenceType),
-                    additionalInformation = model.AdditionalInformation
+                    additionalInformation = model.AdditionalInformation,
+                    paymentTypeCode = this.unitOfWork.DbContext.Set<ObligationType>().Where(o => o.ObligationTypeId == obligationTypeId).Single().PaymentTypeCode.Trim(),
                 })));
 
             string signature = HmacRequestHelper.CalculateHmac(eserviceClient.SecretKey, body);

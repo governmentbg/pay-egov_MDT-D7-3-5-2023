@@ -50,12 +50,12 @@ namespace EPayments.Distributions.Implementations
                                     O1 = (firstDescription != null && firstDescription.Length > 35 ? firstDescription.Substring(0, 35) : firstDescription),
                                     //O2 = (secondDescription != null && secondDescription.Length > 35 ? secondDescription.Substring(0, 35) : secondDescription),
                                     O2 = $"refid {distributionRevenue.DistributionRevenueId.ToString()}",
-                                    Sys = distributionRevenue.TotalSum <= 100000 ?  PaymentSystemEnum.BISERA : PaymentSystemEnum.RINGS
+                                    Sys = g.Value <= 100000 ?  PaymentSystemEnum.BISERA : PaymentSystemEnum.RINGS
                                 };
 
                                 int algorithmId = oblicationTypeList.FirstOrDefault(x => x.ObligationTypeId == g.Key.ObligationTypeId).AlgorithmId;
 
-                                if (IsIbanValid(g.Key.EserviceClient.AccountIBAN, algorithmId))
+                                if (ShouldIncludeVpp(g.Key.EserviceClient.AccountIBAN, algorithmId))
                                 {
                                     var obligationType = oblicationTypeList.FirstOrDefault(o => o.ObligationTypeId == g.Key.ObligationTypeId);
                                     if(obligationType != null)
@@ -85,7 +85,7 @@ namespace EPayments.Distributions.Implementations
             };
         }
 
-        private bool IsIbanValid(string iban, int algorithmId)
+        private bool ShouldIncludeVpp(string iban, int algorithmId)
         {
             bool isValid = false;
             if (iban != null && iban.Length >= 13)
@@ -96,6 +96,10 @@ namespace EPayments.Distributions.Implementations
                     {
                         isValid = true;
                     }
+                }
+                else if (algorithmId == 2 && iban[12] == '8')
+                {
+                    isValid = false;
                 }
                 else
                 {

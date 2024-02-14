@@ -31,6 +31,7 @@ namespace EPayments.Data.ViewObjects.Web
         public PaymentRequestStatus PaymentRequestStatusId { get; set; }
         public string ObligationType { get; set; }
         public string ObligationTypeCode { get; set; }
+        public int ObligationTypeAlgorithmId { get; set; }
         public string AdditionalInformation { get; set; }
     }
 }
