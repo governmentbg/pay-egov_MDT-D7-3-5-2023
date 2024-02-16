@@ -71,6 +71,7 @@ namespace EPayments.Data.Repositories.Implementations
             return this.unitOfWork.DbContext.Set<EserviceNotification>()
                                 .Include(e => e.EserviceClient)
                                 .Include(e => e.PaymentRequest)
+                                .Include(e => e.PaymentRequest.ObligationType)
                                 .SingleOrDefault(e => e.EserviceNotificationId == eserviceNotificationId);
         }
 

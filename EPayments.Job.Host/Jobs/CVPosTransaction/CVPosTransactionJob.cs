@@ -162,11 +162,14 @@ namespace EPayments.Job.Host.Jobs.CVPosTransaction
                         JobLogger.Get(JobName.CVPosTransaction).Log(LogLevel.Info, $"ProcessPendingCVposRequest -> cVposTransaction_Agency:{cVposTransaction_Agency}, " +
                             $"cVposTransaction_Event:{cVposTransaction_Event}, startDate:{startDate}, AppSettings.EPaymentsWeb_CentralVposDevTerminalId:{AppSettings.EPaymentsWeb_CentralVposDevTerminalId}");
 
-                        recEventTransaction[] result = CVPosRegisterManager.GetTransactionPerDate(
-                            cVposTransaction_Agency,
-                            cVposTransaction_Event,
-                            startDate,
-                            AppSettings.EPaymentsWeb_CentralVposDevTerminalId);
+                        recEventTransaction[] result = BoricaRetryPolicy.GetBoricaRetryPolicy(JobName.CVPosTransaction).Execute(() =>
+                        {
+                           return CVPosRegisterManager.GetTransactionPerDate(
+                               cVposTransaction_Agency,
+                               cVposTransaction_Event,
+                               startDate,
+                               AppSettings.EPaymentsWeb_CentralVposDevTerminalId);
+                        });
 
                         if (result == null || result.Length == 0)
                         {

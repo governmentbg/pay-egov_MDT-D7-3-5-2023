@@ -1,5 +1,7 @@
 ﻿using ClosedXML.Excel;
 using EPayments.Admin.Auth;
+using EPayments.Admin.Common;
+using EPayments.Admin.DataObjects;
 using EPayments.Admin.Models.PaymentRequests;
 using EPayments.Admin.Models.Shared;
 using EPayments.Common;
@@ -7,6 +9,8 @@ using EPayments.Common.Helpers;
 using EPayments.Data.Repositories.Interfaces;
 using EPayments.Data.ViewObjects.Admin;
 using EPayments.Model.Enums;
+using EPayments.Model.Models;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,11 +29,41 @@ namespace EPayments.Admin.Controllers
             this.PaymentRequestRepository = paymentRequestRepository ?? throw new ArgumentNullException("paymentRequestRepository is null");
         }
 
+        [HttpPost]
+        public virtual ActionResult ListSearch(PaymentRequestSearchDO searchDO)
+        {
+            return RedirectToAction(MVC.PaymentRequest.ActionNames.List, MVC.PaymentRequest.Name,
+                new
+                {
+                    @prId = searchDO.PrId,
+                    @prRefenceNumber = searchDO.PrRefenceNumber,
+                    @prDateFrom = searchDO.PrDateFrom,
+                    @prDateTo = searchDO.PrDateTo,
+                    @prAmountFrom = searchDO.PrAmountFrom,
+                    @prAmountTo = searchDO.PrAmountTo,
+                    @prProvider = searchDO.PrProvider,
+                    @prReason = searchDO.PrReason,
+                    @prApplicantName = searchDO.PrApplicantName,
+                    @PrApplicantUin = searchDO.PrApplicantUin,
+                    @prPaymentStatus = searchDO.PrPaymentStatus,
+                    @prPaymentStatusChanged = searchDO.PrPaymentStatusChanged,
+                    @prObligationStatus = searchDO.PrObligationStatus,
+
+                    @prPage = searchDO.PrPage,
+                    @prSortBy = searchDO.PrSortBy,
+                    @prSortDesc = searchDO.PrSortDesc,
+
+                    @focus = searchDO.Focus,
+                });
+        }
+
         [HttpGet]
         public virtual async Task<ActionResult> List(PaymentRequestSearchDO searchDO)
         {
             if (!searchDO.IsSearchForm && searchDO.PrPaymentStatusChanged.HasValue)
             {
+                searchDO.PrPage = 1;
+
                 await this.PaymentRequestRepository.ChangePaymentRequestsStatus(searchDO.PrId,
                     searchDO.PrRefenceNumber,
                     Parser.GetDateFirstMinute(Parser.BgFormatDateStringToDateTime(searchDO.PrDateFrom)),

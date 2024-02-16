@@ -70,6 +70,9 @@
     <Reference Include="Owin">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
+    <Reference Include="Polly, Version=5.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Polly.5.9.0\lib\net45\Polly.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.ServiceModel" />
@@ -110,6 +113,7 @@
     <Compile Include="Jobs\EDeliveryNotification\EDeliveryNotificationJob.cs" />
     <Compile Include="Jobs\Email\EmailJob.cs" />
     <Compile Include="Jobs\Email\TemplateConfig.cs" />
+    <Compile Include="Jobs\BoricaRetryPolicy.cs" />
     <Compile Include="Jobs\EventRegisterNotification\EventRegisterNotificationJob.cs" />
     <Compile Include="Jobs\UnprocessedVposRequests\UnprocessedVposRequestsJob.cs" />
     <Compile Include="Jobs\ExpiredRequest\ExpiredRequestJob.cs" />

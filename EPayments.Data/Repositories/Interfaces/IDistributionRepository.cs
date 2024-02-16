@@ -16,6 +16,7 @@ namespace EPayments.Data.Repositories.Interfaces
             DateTime? startDate,
             DateTime? endDate,
             int? distributionTypeId,
+            int? distributionRevenueId,
             string sortByPropertyName,
             bool isDescending);
 

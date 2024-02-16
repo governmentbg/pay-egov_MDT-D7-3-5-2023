@@ -28,9 +28,9 @@ namespace EPayments.Service.Api.Common
             }
         }
 
-        public void PermitAccessToRequests(List<string> paymentRequestIdentifiers)
+        public void PermitAccessToRequests(List<string> paymentRequestIdentifiers, bool authorizeIfClientIdIsPaymentInitiator = false)
         {
-            bool isAuthorized = apiRepository.IsClientAuthorizedToAccessRequests(this.clientId, paymentRequestIdentifiers);
+            bool isAuthorized = apiRepository.IsClientAuthorizedToAccessRequests(this.clientId, paymentRequestIdentifiers, authorizeIfClientIdIsPaymentInitiator);
             if (!isAuthorized)
             {
                 throw new CustomServiceException("Not authorized to access payment request.");

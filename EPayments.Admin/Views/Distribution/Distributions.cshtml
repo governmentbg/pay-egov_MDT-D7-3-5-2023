@@ -13,6 +13,7 @@
     string createAtTitle = "Справката е генерирана на";
     string distributedDateTitle = "Справката е разпределена на";
     string isDistributedTitle = "Дали е разпределено";
+    string refidTitle = "refid";
     string totalSumTitle = "Обща сума";
     string distributionTypeTitle = "Вид на разпределението";
     string actionTitle = "Действия";
@@ -24,6 +25,7 @@
     string createAtClass = defaultClass + (Model.SearchDO.SortBy == DistributionRevenueSortEnum.CreatedAt ? (Model.SearchDO.SortDesc ? sortDescClass : sortAsyncClass) : string.Empty);
     string distributedDateClass = defaultClass + (Model.SearchDO.SortBy == DistributionRevenueSortEnum.DistributedDate ? (Model.SearchDO.SortDesc ? sortDescClass : sortAsyncClass) : string.Empty);
     string isDistributedClass = defaultClass + (Model.SearchDO.SortBy == DistributionRevenueSortEnum.IsDistributed ? (Model.SearchDO.SortDesc ? sortDescClass : sortAsyncClass) : string.Empty);
+    string refidClass = defaultClass + (Model.SearchDO.SortBy == DistributionRevenueSortEnum.Refid ? (Model.SearchDO.SortDesc ? sortDescClass : sortAsyncClass) : string.Empty);
     string totalSumClass = defaultClass + (Model.SearchDO.SortBy == DistributionRevenueSortEnum.TotalSum ? (Model.SearchDO.SortDesc ? sortDescClass : sortAsyncClass) : string.Empty);
     string distributionTypeClass = defaultClass + (Model.SearchDO.SortBy == DistributionRevenueSortEnum.DistributionType ? (Model.SearchDO.SortDesc ? sortDescClass : sortAsyncClass) : string.Empty);
     string fileNameClass = defaultClass + (Model.SearchDO.SortBy == DistributionRevenueSortEnum.FileName ? (Model.SearchDO.SortDesc ? sortDescClass : sortAsyncClass) : string.Empty);
@@ -103,14 +105,23 @@
                         <div class="col-lg-6 col-sm-12">
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label>Вид на разпределение</label>
-                                        @Html.DropDownListFor(m => m.SearchDO.DistributionType,
-                                        CreateDropDown(Model.DistribtutionTypes)
-                                        , new { @class = "form-control" })
+                                    <div class="row">
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <label>Вид на разпределение</label>
+                                                @Html.DropDownListFor(m => m.SearchDO.DistributionType,
+                                                CreateDropDown(Model.DistribtutionTypes)
+                                                , new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>refid</label>
+                                                @Html.TextBoxFor(m => m.SearchDO.DistributionRevenueId, new { @class = "form-control"})
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -129,6 +140,7 @@
             <div class="@createAtClass">@Html.ActionLink(createAtTitle, MVC.Distribution.ActionNames.Distributions, MVC.Distribution.Name, Model.SearchDO.ToDistributionSourtRouteValues(DistributionRevenueSortEnum.CreatedAt), null)</div>
             <div class="@distributedDateClass">@Html.ActionLink(distributedDateTitle, MVC.Distribution.ActionNames.Distributions, MVC.Distribution.Name, Model.SearchDO.ToDistributionSourtRouteValues(DistributionRevenueSortEnum.DistributedDate), null)</div>
             <div class="@isDistributedClass">@Html.ActionLink(isDistributedTitle, MVC.Distribution.ActionNames.Distributions, MVC.Distribution.Name, Model.SearchDO.ToDistributionSourtRouteValues(DistributionRevenueSortEnum.IsDistributed), null)</div>
+            <div class="@refidClass">@Html.ActionLink(refidTitle, MVC.Distribution.ActionNames.Distributions, MVC.Distribution.Name, Model.SearchDO.ToDistributionSourtRouteValues(DistributionRevenueSortEnum.Refid), null)</div>
             <div class="@totalSumClass">@Html.ActionLink(totalSumTitle, MVC.Distribution.ActionNames.Distributions, MVC.Distribution.Name, Model.SearchDO.ToDistributionSourtRouteValues(DistributionRevenueSortEnum.TotalSum), null)</div>
             <div class="@distributionTypeClass">@Html.ActionLink(distributionTypeTitle, MVC.Distribution.ActionNames.Distributions, MVC.Distribution.Name, Model.SearchDO.ToDistributionSourtRouteValues(DistributionRevenueSortEnum.DistributionType), null)</div>
             <div class="@fileNameClass">@Html.ActionLink(fileNameTitle, MVC.Distribution.ActionNames.Distributions, MVC.Distribution.Name, Model.SearchDO.ToDistributionSourtRouteValues(DistributionRevenueSortEnum.FileName), null)</div>
@@ -152,6 +164,10 @@
                     <div class="results-cell">
                         <span class="hidden-lg">@(isDistributedTitle):</span>
                         <span class="label">@(distribution.IsDistributed == true ? yes : no)</span>
+                    </div>
+                    <div class="results-cell">
+                        <span class="hidden-lg">@(refidTitle):</span>
+                        <span class="label">@(distribution.DistributionRevenueId)</span>
                     </div>
                     <div class="results-cell">
                         <span class="hidden-lg">@(totalSumTitle):</span>

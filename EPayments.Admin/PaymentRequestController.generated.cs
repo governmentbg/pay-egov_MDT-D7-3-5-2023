@@ -94,6 +94,7 @@ namespace EPayments.Admin.Controllers
         public class ActionNamesClass
         {
             public readonly string List = "List";
+            public readonly string ListSearch = "ListSearch";
             public readonly string DownloadPdf = "DownloadPdf";
             public readonly string DownloadExcel = "DownloadExcel";
         }

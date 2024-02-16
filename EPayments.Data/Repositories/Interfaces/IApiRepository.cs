@@ -22,7 +22,7 @@ namespace EPayments.Data.Repositories.Interfaces
 
         bool IsValidRequestWithKeyDataExist(string serviceProviderIBAN, string paymentReferenceNumber, DateTime paymentReferenceDate);
 
-        bool IsClientAuthorizedToAccessRequests(string clientId, List<string> paymentRequestIdentifiers);
+        bool IsClientAuthorizedToAccessRequests(string clientId, List<string> paymentRequestIdentifiers, bool authorizeIfClientIdIsPaymentInitiator = false);
 
         PaymentRequest GetPaymentRequestByAisPaymentId(int eserviceClientId, string aisPaymentId);
 

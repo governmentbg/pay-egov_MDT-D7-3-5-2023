@@ -22,6 +22,7 @@ using System.Web.Helpers;
 using System.Web.Mvc;
 using OT = EPayments.Admin.Models.ObligationType;
 using EPayments.EDelivery.Manager;
+using log4net;
 
 namespace EPayments.Admin.Controllers
 {
@@ -31,6 +32,7 @@ namespace EPayments.Admin.Controllers
         private IWebRepository webRepository;
         private IUnitOfWork unitOfWork;
         private IDeliveryRegisterManager deliveryManager;
+        private static readonly ILog Logger = LogManager.GetLogger(nameof(EserviceClientController));
 
         public EserviceClientController(IWebRepository webRepository, IUnitOfWork unitOfWork, IDeliveryRegisterManager deliveryManager)
         {
@@ -139,65 +141,89 @@ namespace EPayments.Admin.Controllers
         [HttpGet]
         public virtual ActionResult View(int id)
         {
-            EServiceClientVM model = this.CreateModel(id, true, FormMode.View);
-            return View(model);
+            try
+            {
+                EServiceClientVM model = this.CreateModel(id, true, FormMode.View);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+                throw;
+            }
         }
 
         [HttpGet]
         public virtual ActionResult Create()
         {
-            EServiceClientVM model = this.CreateModel(null, false, FormMode.Create);
-            return View(model);
+            try
+            {
+                EServiceClientVM model = this.CreateModel(null, false, FormMode.Create);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex);
+                throw;
+            }
         }
 
         [HttpPost]
         public virtual ActionResult Create(EServiceClientVM model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                model = AddModelParameters(model, false, FormMode.Create);
-                return View(model);
-            }
+                if (!ModelState.IsValid)
+                {
+                    model = AddModelParameters(model, false, FormMode.Create);
+                    return View(model);
+                }
 
-            if (this.unitOfWork.DbContext.Set<EserviceClient>().Any(ec => ec.AisName == model.AisName))
+                if (this.unitOfWork.DbContext.Set<EserviceClient>().Any(ec => ec.AisName == model.AisName))
+                {
+                    this.ModelState.AddModelError(string.Empty, "Съществува друг АИС клиент със същото име.");
+
+                    model = AddModelParameters(model, false, FormMode.Create);
+                    return View(model);
+                }
+
+                var eserviceClient = new EserviceClient();
+
+                eserviceClient.Alias = Guid.NewGuid().ToString();
+                eserviceClient.AisName = model.AisName;
+                eserviceClient.ServiceName = model.AisName;
+                eserviceClient.AccountBank = model.AccountBank;
+                eserviceClient.AccountBIC = model.AccountBIC.ToUpper();
+                eserviceClient.AccountIBAN = model.AccountIBAN.ToUpper();
+                eserviceClient.IsEpayVposEnabled = model.IsEpayVposEnabled;
+                eserviceClient.IsBoricaVposEnabled = model.IsBoricaVposEnabled;
+                eserviceClient.IsActive = model.IsActiveBoolNom == ActiveStatus.Activated;
+                // eserviceClient.ObligationTypeId = model.ObligationTypeId;
+                eserviceClient.DeliveryAdminstrationId = model.DeliveryAdminstrationId;
+                eserviceClient.DeliveryAdministrationGuid = model.DeliveryAdministrationGuid;
+
+                eserviceClient.DepartmentId = model.DepartmentId;
+                eserviceClient.AggregateToParent = model.AggregateToParent == BoolNom.Yes;
+                eserviceClient.DistributionTypeId = (int)model.DistributionType;
+                eserviceClient.ParentId = model.ParentId;
+                eserviceClient.Gid = Guid.NewGuid();
+                eserviceClient.IsAuthPassAuthorized = false;
+                eserviceClient.ClientId = GenerateClientId(eserviceClient.Gid);
+                eserviceClient.SecretKey = GenerateSecretKey();
+                //eserviceClient.BudgetCode = model.BudgetCode;
+
+                this.unitOfWork.DbContext.Set<EserviceClient>().Add(eserviceClient);
+                this.unitOfWork.Save();
+
+                TempData[TempDataKeys.Message] = "АИС клиента беше успешно добавен.";
+
+                return RedirectToAction(MVC.EserviceClient.ActionNames.List, MVC.EserviceClient.Name);
+            }
+            catch (Exception ex)
             {
-                this.ModelState.AddModelError(string.Empty, "Съществува друг АИС клиент със същото име.");
-
-                model = AddModelParameters(model, false, FormMode.Create);
-                return View(model);
+                Logger.Error(ex);
+                throw;
             }
-
-            var eserviceClient = new EserviceClient();
-
-            eserviceClient.Alias = Guid.NewGuid().ToString();
-            eserviceClient.AisName = model.AisName;
-            eserviceClient.ServiceName = model.AisName;
-            eserviceClient.AccountBank = model.AccountBank;
-            eserviceClient.AccountBIC = model.AccountBIC.ToUpper();
-            eserviceClient.AccountIBAN = model.AccountIBAN.ToUpper();
-            eserviceClient.IsEpayVposEnabled = model.IsEpayVposEnabled;
-            eserviceClient.IsBoricaVposEnabled = model.IsBoricaVposEnabled;
-            eserviceClient.IsActive = model.IsActiveBoolNom == ActiveStatus.Activated;
-           // eserviceClient.ObligationTypeId = model.ObligationTypeId;
-            eserviceClient.DeliveryAdminstrationId = model.DeliveryAdminstrationId;
-            eserviceClient.DeliveryAdministrationGuid = model.DeliveryAdministrationGuid;
-
-            eserviceClient.DepartmentId = model.DepartmentId;
-            eserviceClient.AggregateToParent = model.AggregateToParent == BoolNom.Yes;
-            eserviceClient.DistributionTypeId = (int)model.DistributionType;
-            eserviceClient.ParentId = model.ParentId;
-            eserviceClient.Gid = Guid.NewGuid();
-            eserviceClient.IsAuthPassAuthorized = false;
-            eserviceClient.ClientId = GenerateClientId(eserviceClient.Gid);
-            eserviceClient.SecretKey = GenerateSecretKey();
-            //eserviceClient.BudgetCode = model.BudgetCode;
-
-            this.unitOfWork.DbContext.Set<EserviceClient>().Add(eserviceClient);
-            this.unitOfWork.Save();
-
-            TempData[TempDataKeys.Message] = "АИС клиента беше успешно добавен.";
-
-            return RedirectToAction(MVC.EserviceClient.ActionNames.List, MVC.EserviceClient.Name);
         }
 
         [HttpGet]
@@ -1228,33 +1254,41 @@ namespace EPayments.Admin.Controllers
 
         private EServiceClientVM CreateModel(int? id, bool addClients, FormMode formMode)
         {
+            Logger.Debug("CreateModel() - start.");
             var departments = this.unitOfWork.DbContext.Set<Department>().ToList();
+            Logger.Debug("CreateModel() - got Departments.");
             var deliveryAdmins = this.deliveryManager.GetAdministration();
+            Logger.Debug("CreateModel() - got Administrations.");
             var obligationTypes = this.unitOfWork.DbContext.Set<ObligationType>()
                 .Where(ot => ot.IsActive)
                 .Select(OT.ObligationTypeOptionVM.MapFrom)
                 .ToList();
-
+            Logger.Debug("CreateModel() - got OblidationTypes.");
 
             EServiceClientVM model;
 
             if (id == null)
             {
+                Logger.Debug("CreateModel() - creating EServiceClientVM without id.");
                 model = new EServiceClientVM(FormMode.Create, null, null, departments, obligationTypes, deliveryAdmins, null);
             }
             else
             {
+                Logger.Debug("CreateModel() - creating EServiceClientVM with id.");
                 var eserviceClient = this.webRepository.GetEserviceClient((int)id);
 
                 var eserviceAdminUser = this.webRepository.GetEserviceAdminUserByReferringEserviceClientId(eserviceClient.EserviceClientId);
-
+                Logger.Debug("CreateModel() - got eserviceClient by id and eserviceAdminUser by EserviceClientId.");
+                
                 var clients = addClients == true ? this.unitOfWork.DbContext.Set<EserviceClient>()
                     .Where(ec => ec.DepartmentId == eserviceClient.DepartmentId)
                     .ToList() :
                     null;
+                Logger.Debug("CreateModel() - got and filtered EserviceClients with the same department id as the eserviceClient which id was passed.");
 
                 model = new EServiceClientVM(formMode, eserviceClient, eserviceAdminUser, departments, obligationTypes, deliveryAdmins, clients);
             }
+            Logger.Debug("CreateModel() - created EServiceClientVM.");
 
             return model;
         }

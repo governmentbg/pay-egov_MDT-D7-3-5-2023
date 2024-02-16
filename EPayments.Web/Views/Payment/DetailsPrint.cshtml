@@ -208,8 +208,35 @@
                         </tr>
                         <tr>
                             <td style="font-size:13px; letter-spacing: 5px;">
-                                @Model.AdditionalInformation
-                            </td>
+                                @if (Model.ObligationTypeAlgorithmId == 1)
+                                {
+                                    if (Model.AdditionalInfoModel != null)
+                                    {
+                                        string clarifications = "";
+                                        if (!String.IsNullOrEmpty(Model.AdditionalInfoModel.PropertyAddress))
+                                        {
+                                            clarifications += String.Format("propertyAddress: {0}", Model.AdditionalInfoModel.PropertyAddress);
+                                        }
+                                        if (!String.IsNullOrEmpty(Model.AdditionalInfoModel.RegisterNo))
+                                        {
+                                            if (!String.IsNullOrEmpty(clarifications))
+                                            {
+                                                clarifications += ", ";
+                                            }
+                                            clarifications += String.Format("registerNo: {0}", Model.AdditionalInfoModel.RegisterNo);
+                                        }
+
+                                        if (!String.IsNullOrEmpty(clarifications))
+                                        {
+                                            @Html.Raw(clarifications)
+                                        }
+                                    }
+                                }
+                                else if (Model.ObligationTypeAlgorithmId == 0)
+                                {
+                                    @Model.AdditionalInformation;
+                                }
+                                        </td>
                         </tr>
                     </tbody>
                 </table>

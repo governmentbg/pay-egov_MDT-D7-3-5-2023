@@ -145,6 +145,7 @@
     <Compile Include="Models\ObligationStatus.cs" />
     <Compile Include="Models\ObligationType.cs" />
     <Compile Include="Models\PaymentRequestObligationLog.cs" />
+    <Compile Include="Models\PaymentRequestStatusModel.cs" />
     <Compile Include="Models\TransactionFile.cs" />
     <Compile Include="Models\TransactionRecord.cs" />
     <Compile Include="Models\EbankingClient.cs" />

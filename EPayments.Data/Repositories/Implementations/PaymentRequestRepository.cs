@@ -67,7 +67,8 @@ namespace EPayments.Data.Repositories.Implementations
                 {
                     var shouldSendNotification = true;
 
-                    if (paymentRequest.PayOrder.HasValue && paymentRequest.PaymentRequestStatusId != PaymentRequestStatus.Paid)
+                    if ((paymentRequest.PayOrder.HasValue || (paymentRequest.ObligationType != null && paymentRequest.ObligationType.AlgorithmId == 2))
+                        && paymentRequest.PaymentRequestStatusId != PaymentRequestStatus.Paid)
                     {
                         shouldSendNotification = false;
                     }

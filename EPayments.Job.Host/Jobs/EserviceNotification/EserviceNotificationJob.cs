@@ -157,14 +157,15 @@ namespace EPayments.Job.Host.EserviceNotification
                         ct.ThrowIfCancellationRequested();
 
                         notification = jobRepository.GetEserviceNotificationById(notificationId);
-                        bool isMateus = notification.PaymentRequest.PayOrder.HasValue;
-                        bool isPaymentPaid = notification.PaymentRequest.PaymentRequestStatusId == PaymentRequestStatus.Paid;
-
-                        if (isMateus && !isPaymentPaid)
+                        
+                        // notifications are stopped for payment requests with algorithm 1 and 2 and request statuses different than Paid
+                        int algorithmId = notification.PaymentRequest.ObligationType.AlgorithmId;
+                        if ((algorithmId == 1 || algorithmId == 2) && notification.PaymentRequest.PaymentRequestStatusId != PaymentRequestStatus.Paid)
                         {
                             jobRepository.RemoveEserviceNotification(notification);
                             continue;
                         }
+
                         if (notification.EserviceClientId == 1611 
                             || notification.EserviceClientId == 1612 
                             || notification.EserviceClientId == 1673)
@@ -206,7 +207,7 @@ namespace EPayments.Job.Host.EserviceNotification
 
                                 try
                                 {
-                                    var task = client.PostAsync(postUri, new StringContent(isMateus? encodedHttpBodyMateus : encodedHttpBody, Encoding.UTF8, postMediaType));
+                                    var task = client.PostAsync(postUri, new StringContent(algorithmId == 1 ? encodedHttpBodyMateus : encodedHttpBody, Encoding.UTF8, postMediaType));
 
                                     await task;
 
